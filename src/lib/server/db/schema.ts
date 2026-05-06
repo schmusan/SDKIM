@@ -57,6 +57,11 @@ export const import_logs = sqliteTable('import_logs', {
 	created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString())
 });
 
+export const app_settings = sqliteTable('app_settings', {
+	key: text('key').primaryKey(),
+	value: text('value').notNull()
+});
+
 export const import_templates = sqliteTable('import_templates', {
 	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
 	name: text('name').notNull(),
