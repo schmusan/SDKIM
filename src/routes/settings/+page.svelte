@@ -240,7 +240,6 @@
 		<div class="space-y-1 text-sm text-gray-600">
 			<p>SD-Karten Import Management</p>
 			<p>ZHAW Prototyping-Projekt 2026</p>
-			<p class="text-xs text-gray-400 mt-2">SvelteKit · TypeScript · Drizzle ORM · SQLite · Tailwind CSS</p>
 		</div>
 	</div>
 </div>
