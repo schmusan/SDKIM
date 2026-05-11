@@ -1,38 +1,33 @@
-import { db } from '$lib/server/db';
-import { projects, imports, files } from '$lib/server/db/schema';
-import { desc, eq, count, sum, like, or } from 'drizzle-orm';
+import { getCollections, mapId } from '$lib/server/db';
 import { fail, redirect } from '@sveltejs/kit';
 
 export async function load({ url }) {
 	const search = url.searchParams.get('q') ?? '';
 	const sort = url.searchParams.get('sort') ?? 'newest';
+	const { projects, imports } = await getCollections();
 
-	const allProjects = await db
-		.select({
-			id: projects.id,
-			name: projects.name,
-			notes: projects.notes,
-			created_at: projects.created_at
-		})
-		.from(projects)
-		.where(search ? like(projects.name, `%${search}%`) : undefined)
-		.orderBy(sort === 'name' ? projects.name : desc(projects.created_at));
+	const filter = search ? { name: { $regex: search, $options: 'i' } } : {};
+	const sortOpt = sort === 'name' ? { name: 1 as const } : { created_at: -1 as const };
 
-	// Import-Statistiken pro Projekt
-	const stats = await db
-		.select({
-			project_id: imports.project_id,
-			import_count: count(imports.id),
-			total_size: sum(imports.total_size),
-			file_count: sum(imports.file_count)
-		})
-		.from(imports)
-		.groupBy(imports.project_id);
+	const allProjects = await projects.find(filter).sort(sortOpt).toArray();
 
-	const statsMap = Object.fromEntries(stats.map(s => [s.project_id, s]));
+	const stats = await imports
+		.aggregate([
+			{
+				$group: {
+					_id: '$project_id',
+					import_count: { $sum: 1 },
+					total_size: { $sum: '$total_size' },
+					file_count: { $sum: '$file_count' }
+				}
+			}
+		])
+		.toArray();
+
+	const statsMap = Object.fromEntries(stats.map((s) => [s._id, s]));
 
 	return {
-		projects: allProjects.map(p => ({ ...p, stats: statsMap[p.id] ?? null })),
+		projects: allProjects.map((p) => ({ ...mapId(p), stats: statsMap[p._id] ?? null })),
 		search,
 		sort
 	};
@@ -44,13 +39,16 @@ export const actions = {
 		const name = (data.get('name') as string)?.trim();
 		const notes = (data.get('notes') as string)?.trim() || null;
 		if (!name) return fail(400, { error: 'Projektname erforderlich' });
-		const [created] = await db.insert(projects).values({ name, notes }).returning();
-		redirect(303, `/projects/${created.id}`);
+		const { projects } = await getCollections();
+		const id = crypto.randomUUID();
+		await projects.insertOne({ _id: id, name, notes, created_at: new Date().toISOString() });
+		redirect(303, `/projects/${id}`);
 	},
 	delete: async ({ request }) => {
 		const data = await request.formData();
 		const id = data.get('id') as string;
 		if (!id) return fail(400, { error: 'Keine ID angegeben' });
-		await db.delete(projects).where(eq(projects.id, id));
+		const { projects } = await getCollections();
+		await projects.deleteOne({ _id: id });
 	}
 };

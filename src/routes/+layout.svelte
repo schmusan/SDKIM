@@ -14,6 +14,12 @@
 		{ href: '/statistics', label: 'Statistiken', icon: '↗' },
 		{ href: '/settings', label: 'Einstellungen', icon: '⚙' }
 	];
+
+	function isActive(href: string) {
+		return href === '/'
+			? $page.url.pathname === '/'
+			: $page.url.pathname.startsWith(href);
+	}
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
@@ -29,7 +35,7 @@
 				<a
 					href={item.href}
 					class="flex items-center gap-3 px-3 py-2 rounded-md text-sm transition-colors
-						{$page.url.pathname === item.href
+						{isActive(item.href)
 						? 'bg-blue-600 text-white'
 						: 'text-gray-300 hover:bg-gray-700 hover:text-white'}"
 				>

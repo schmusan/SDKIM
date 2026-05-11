@@ -1,26 +1,34 @@
-import { db } from '$lib/server/db';
-import { projects, sd_cards, imports, import_templates, files, import_logs } from '$lib/server/db/schema';
+import { getCollections, mapId } from '$lib/server/db';
+import type { FileDoc } from '$lib/server/db/schema';
 import { redirect, fail } from '@sveltejs/kit';
-import { desc, eq } from 'drizzle-orm';
 
 export async function load() {
-	const allProjects = await db.select().from(projects).orderBy(desc(projects.created_at));
-	const allSdCards = await db.select().from(sd_cards).orderBy(desc(sd_cards.created_at));
-	const allTemplates = await db.select().from(import_templates);
-	return { allProjects, allSdCards, allTemplates };
+	const { projects, sd_cards, import_templates } = await getCollections();
+	const [allProjects, allSdCards, allTemplates] = await Promise.all([
+		projects.find().sort({ created_at: -1 }).toArray(),
+		sd_cards.find().sort({ created_at: -1 }).toArray(),
+		import_templates.find().toArray()
+	]);
+	return {
+		allProjects: allProjects.map(mapId),
+		allSdCards: allSdCards.map(mapId),
+		allTemplates: allTemplates.map(mapId)
+	};
 }
 
 export const actions = {
 	default: async ({ request }) => {
 		const data = await request.formData();
+		const { projects, sd_cards, imports, files, import_logs, import_templates } =
+			await getCollections();
 
 		// Projekt anlegen falls neu
 		let projectId = data.get('project_id') as string;
 		if (projectId === 'new') {
 			const name = (data.get('new_project_name') as string)?.trim();
 			if (!name) return fail(400, { error: 'Projektname erforderlich' });
-			const [created] = await db.insert(projects).values({ name }).returning();
-			projectId = created.id;
+			projectId = crypto.randomUUID();
+			await projects.insertOne({ _id: projectId, name, created_at: new Date().toISOString() });
 		}
 
 		// SD-Karten (mehrere möglich)
@@ -32,8 +40,14 @@ export const actions = {
 		for (const id of sdCardIds) {
 			if (id === 'new') {
 				if (!newSdLabel) return fail(400, { error: 'SD-Karten Label erforderlich' });
-				const [created] = await db.insert(sd_cards).values({ label: newSdLabel, serial: newSdSerial }).returning();
-				resolvedSdCardIds.push(created.id);
+				const newId = crypto.randomUUID();
+				await sd_cards.insertOne({
+					_id: newId,
+					label: newSdLabel,
+					serial: newSdSerial,
+					created_at: new Date().toISOString()
+				});
+				resolvedSdCardIds.push(newId);
 			} else {
 				resolvedSdCardIds.push(id);
 			}
@@ -41,58 +55,79 @@ export const actions = {
 
 		if (resolvedSdCardIds.length === 0) return fail(400, { error: 'Mindestens eine SD-Karte erforderlich' });
 
-		const verifyChecksums = data.get('verify_checksums') === 'on' ? 1 : 0;
-		const detectDuplicates = data.get('detect_duplicates') === 'on' ? 1 : 0;
+		const verifyChecksums = data.get('verify_checksums') === 'on';
+		const detectDuplicates = data.get('detect_duplicates') === 'on';
 
 		// Template speichern falls gewünscht
 		const templateName = (data.get('template_name') as string)?.trim();
 		if (templateName) {
-			await db.insert(import_templates).values({
+			await import_templates.insertOne({
+				_id: crypto.randomUUID(),
 				name: templateName,
 				folder_structure: '{camera}/{date}',
 				verify_checksums: verifyChecksums,
-				detect_duplicates: detectDuplicates
+				detect_duplicates: detectDuplicates,
+				rename_files: false
 			});
 		}
 
 		// Import pro SD-Karte
 		const importIds: string[] = [];
 		for (const sdCardId of resolvedSdCardIds) {
-			const [imp] = await db.insert(imports).values({
+			const importId = crypto.randomUUID();
+			await imports.insertOne({
+				_id: importId,
 				project_id: projectId,
 				sd_card_id: sdCardId,
-				status: 'running'
-			}).returning();
+				status: 'running',
+				started_at: new Date().toISOString(),
+				file_count: 0,
+				total_size: 0,
+				duplicate_count: 0,
+				error_count: 0
+			});
 
-			const sampleFiles = generateSampleFiles(imp.id, verifyChecksums, detectDuplicates);
-			if (sampleFiles.length > 0) await db.insert(files).values(sampleFiles);
+			const sampleFiles = generateSampleFiles(importId, verifyChecksums, detectDuplicates);
+			if (sampleFiles.length > 0) await files.insertMany(sampleFiles as FileDoc[]);
 
 			const totalSize = sampleFiles.reduce((s, f) => s + f.size, 0);
-			const duplicateCount = sampleFiles.filter(f => f.is_duplicate).length;
+			const duplicateCount = sampleFiles.filter((f) => f.is_duplicate).length;
 
-			await db.update(imports).set({
-				status: 'completed',
-				completed_at: new Date().toISOString(),
-				file_count: sampleFiles.length,
-				total_size: totalSize,
-				duplicate_count: duplicateCount,
-				error_count: 0
-			}).where(eq(imports.id, imp.id));
+			await imports.updateOne(
+				{ _id: importId },
+				{
+					$set: {
+						status: 'completed',
+						completed_at: new Date().toISOString(),
+						file_count: sampleFiles.length,
+						total_size: totalSize,
+						duplicate_count: duplicateCount,
+						error_count: 0
+					}
+				}
+			);
 
-			await db.insert(import_logs).values([
-				{ import_id: imp.id, type: 'info', message: `${sampleFiles.length} Dateien gefunden und kopiert` },
-				...(duplicateCount > 0 ? [{ import_id: imp.id, type: 'warning', message: `${duplicateCount} Duplikat(e) erkannt und übersprungen` }] : []),
-				...(verifyChecksums ? [{ import_id: imp.id, type: 'info', message: 'Prüfsummen verifiziert – alle Dateien korrekt' }] : [])
-			]);
+			const logEntries = [
+				{ import_id: importId, type: 'info', message: `${sampleFiles.length} Dateien gefunden und kopiert` },
+				...(duplicateCount > 0
+					? [{ import_id: importId, type: 'warning', message: `${duplicateCount} Duplikat(e) erkannt und übersprungen` }]
+					: []),
+				...(verifyChecksums
+					? [{ import_id: importId, type: 'info', message: 'Prüfsummen verifiziert – alle Dateien korrekt' }]
+					: [])
+			];
+			await import_logs.insertMany(
+				logEntries.map((e) => ({ _id: crypto.randomUUID(), ...e, created_at: new Date().toISOString() }))
+			);
 
-			importIds.push(imp.id);
+			importIds.push(importId);
 		}
 
-		redirect(303, `/import/confirm?ids=${importIds.join(',')}`);
+		redirect(303, `/import/progress?ids=${importIds.join(',')}`);
 	}
 };
 
-function generateSampleFiles(importId: string, verify: number, detectDupes: number) {
+function generateSampleFiles(importId: string, verify: boolean, detectDupes: boolean) {
 	const cameras = ['SonyA7IV', 'SonyA7III', 'CanonR5'];
 	const extensions = ['MP4', 'MP4', 'MP4', 'JPG', 'ARW'];
 	const count = Math.floor(Math.random() * 30) + 10;
@@ -102,20 +137,22 @@ function generateSampleFiles(importId: string, verify: number, detectDupes: numb
 		const cam = cameras[Math.floor(Math.random() * cameras.length)];
 		const ext = extensions[Math.floor(Math.random() * extensions.length)];
 		const filename = `${cam}_${String(i + 1).padStart(4, '0')}.${ext}`;
-		const isDuplicate = detectDupes && seen.has(filename) ? 1 : 0;
+		const isDuplicate = detectDupes && seen.has(filename);
 		seen.add(filename);
 
 		return {
+			_id: crypto.randomUUID(),
 			import_id: importId,
 			filename,
 			path: `/media/${cam}/${filename}`,
-			size: ext === 'MP4' ? Math.random() * 2 * 1024 ** 3 : Math.random() * 25 * 1024 ** 2,
+			size: ext === 'MP4' ? Math.random() * 2 * 1073741824 : Math.random() * 25 * 1048576,
 			checksum: verify ? crypto.randomUUID().replace(/-/g, '') : null,
 			exif_camera_model: cam,
 			exif_iso: Math.floor(Math.random() * 3200) + 100,
 			exif_shutter: `1/${Math.floor(Math.random() * 500) + 50}`,
 			exif_focal_length: `${[24, 35, 50, 70, 85][Math.floor(Math.random() * 5)]}mm`,
-			is_duplicate: isDuplicate
+			is_duplicate: isDuplicate,
+			created_at: new Date().toISOString()
 		};
 	});
 }

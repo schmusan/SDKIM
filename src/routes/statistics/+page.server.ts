@@ -1,45 +1,60 @@
-import { db } from '$lib/server/db';
-import { imports, files, projects, sd_cards } from '$lib/server/db/schema';
-import { desc, eq, count, sum } from 'drizzle-orm';
+import { getCollections } from '$lib/server/db';
 
 export async function load() {
-	// Imports pro Tag (letzte 30 Tage)
-	const allImports = await db
-		.select({
-			started_at: imports.started_at,
-			file_count: imports.file_count,
-			total_size: imports.total_size,
-			duplicate_count: imports.duplicate_count
-		})
-		.from(imports)
-		.orderBy(imports.started_at);
+	const { imports, files, projects } = await getCollections();
+
+	const [allImports, allProjects] = await Promise.all([
+		imports.find().sort({ started_at: 1 }).toArray(),
+		projects.find().toArray()
+	]);
 
 	// Speicher pro Projekt
-	const projectStats = await db
-		.select({
-			name: projects.name,
-			total_size: sum(imports.total_size),
-			file_count: sum(imports.file_count),
-			import_count: count(imports.id)
-		})
-		.from(projects)
-		.leftJoin(imports, eq(imports.project_id, projects.id))
-		.groupBy(projects.id)
-		.orderBy(desc(sum(imports.total_size)));
+	const importsByProject = await imports
+		.aggregate([
+			{
+				$group: {
+					_id: '$project_id',
+					total_size: { $sum: '$total_size' },
+					file_count: { $sum: '$file_count' },
+					import_count: { $sum: 1 }
+				}
+			}
+		])
+		.toArray();
+
+	const projectMap = Object.fromEntries(allProjects.map((p) => [p._id, p.name]));
+
+	const projectStats = importsByProject
+		.map((s) => ({
+			name: projectMap[s._id as string] ?? 'Unbekannt',
+			total_size: s.total_size as number,
+			file_count: s.file_count as number,
+			import_count: s.import_count as number
+		}))
+		.sort((a, b) => b.total_size - a.total_size);
 
 	// Dateien nach Kamera
-	const byCamera = await db
-		.select({
-			camera: files.exif_camera_model,
-			file_count: count(files.id),
-			total_size: sum(files.size)
-		})
-		.from(files)
-		.groupBy(files.exif_camera_model)
-		.orderBy(desc(count(files.id)));
+	const byCameraRaw = await files
+		.aggregate([
+			{
+				$group: {
+					_id: '$exif_camera_model',
+					file_count: { $sum: 1 },
+					total_size: { $sum: '$size' }
+				}
+			},
+			{ $sort: { file_count: -1 } }
+		])
+		.toArray();
 
-	// Dateien nach Format
-	const allFiles = await db.select({ filename: files.filename, size: files.size }).from(files);
+	const byCamera = byCameraRaw.map((c) => ({
+		camera: (c._id as string) ?? 'Unbekannt',
+		file_count: c.file_count as number,
+		total_size: c.total_size as number
+	}));
+
+	// Dateien nach Format (in JS)
+	const allFiles = await files.find({}, { projection: { filename: 1, size: 1 } }).toArray();
 	const byFormat: Record<string, { count: number; size: number }> = {};
 	for (const f of allFiles) {
 		const ext = f.filename.split('.').pop()?.toUpperCase() ?? '?';
@@ -49,17 +64,14 @@ export async function load() {
 	}
 
 	// Gesamtzahlen
-	const [totals] = await db.select({
-		total_files: count(files.id),
-		total_size: sum(files.size)
-	}).from(files);
+	const [fileCount, sizeResult, importCount, dupResult] = await Promise.all([
+		files.countDocuments(),
+		files.aggregate([{ $group: { _id: null, total: { $sum: '$size' } } }]).toArray(),
+		imports.countDocuments(),
+		imports.aggregate([{ $group: { _id: null, total: { $sum: '$duplicate_count' } } }]).toArray()
+	]);
 
-	const [importTotals] = await db.select({
-		total_imports: count(imports.id),
-		total_duplicates: sum(imports.duplicate_count)
-	}).from(imports);
-
-	// Importe gruppiert nach Datum
+	// Importe nach Tag
 	const byDay: Record<string, number> = {};
 	for (const imp of allImports) {
 		const day = imp.started_at.slice(0, 10);
@@ -68,22 +80,13 @@ export async function load() {
 
 	return {
 		totals: {
-			files: totals.total_files ?? 0,
-			size: Number(totals.total_size ?? 0),
-			imports: importTotals.total_imports ?? 0,
-			duplicates: Number(importTotals.total_duplicates ?? 0)
+			files: fileCount,
+			size: (sizeResult[0] as { total?: number } | undefined)?.total ?? 0,
+			imports: importCount,
+			duplicates: (dupResult[0] as { total?: number } | undefined)?.total ?? 0
 		},
-		projectStats: projectStats.map(p => ({
-			name: p.name,
-			total_size: Number(p.total_size ?? 0),
-			file_count: Number(p.file_count ?? 0),
-			import_count: p.import_count
-		})),
-		byCamera: byCamera.map(c => ({
-			camera: c.camera ?? 'Unbekannt',
-			file_count: c.file_count,
-			total_size: Number(c.total_size ?? 0)
-		})),
+		projectStats,
+		byCamera,
 		byFormat,
 		byDay
 	};

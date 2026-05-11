@@ -1,72 +1,70 @@
-import { integer, sqliteTable, text, real } from 'drizzle-orm/sqlite-core';
+export interface ProjectDoc {
+	_id: string;
+	name: string;
+	notes?: string | null;
+	created_at: string;
+}
 
-export const projects = sqliteTable('projects', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	name: text('name').notNull(),
-	notes: text('notes'),
-	created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString())
-});
+export interface SdCardDoc {
+	_id: string;
+	label: string;
+	serial?: string | null;
+	created_at: string;
+}
 
-export const sd_cards = sqliteTable('sd_cards', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	label: text('label').notNull(),
-	serial: text('serial'),
-	created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString())
-});
+export interface CameraDoc {
+	_id: string;
+	model: string;
+	folder_pattern: string;
+}
 
-export const cameras = sqliteTable('cameras', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	model: text('model').notNull(),
-	folder_pattern: text('folder_pattern').notNull()
-});
+export interface ImportDoc {
+	_id: string;
+	project_id: string;
+	sd_card_id: string;
+	status: string;
+	started_at: string;
+	completed_at?: string | null;
+	file_count: number;
+	total_size: number;
+	duplicate_count: number;
+	error_count: number;
+}
 
-export const imports = sqliteTable('imports', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	project_id: text('project_id').notNull().references(() => projects.id),
-	sd_card_id: text('sd_card_id').notNull().references(() => sd_cards.id),
-	status: text('status').notNull().default('pending'),
-	started_at: text('started_at').notNull().$defaultFn(() => new Date().toISOString()),
-	completed_at: text('completed_at'),
-	file_count: integer('file_count').default(0),
-	total_size: real('total_size').default(0),
-	duplicate_count: integer('duplicate_count').default(0),
-	error_count: integer('error_count').default(0)
-});
+export interface FileDoc {
+	_id: string;
+	import_id: string;
+	filename: string;
+	path: string;
+	size: number;
+	checksum?: string | null;
+	camera_id?: string | null;
+	exif_iso?: number | null;
+	exif_shutter?: string | null;
+	exif_focal_length?: string | null;
+	exif_camera_model?: string | null;
+	is_duplicate: boolean;
+	created_at: string;
+}
 
-export const files = sqliteTable('files', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	import_id: text('import_id').notNull().references(() => imports.id),
-	filename: text('filename').notNull(),
-	path: text('path').notNull(),
-	size: real('size').notNull(),
-	checksum: text('checksum'),
-	camera_id: text('camera_id').references(() => cameras.id),
-	exif_iso: integer('exif_iso'),
-	exif_shutter: text('exif_shutter'),
-	exif_focal_length: text('exif_focal_length'),
-	exif_camera_model: text('exif_camera_model'),
-	is_duplicate: integer('is_duplicate').default(0),
-	created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString())
-});
+export interface ImportLogDoc {
+	_id: string;
+	import_id: string;
+	type: string;
+	message: string;
+	created_at: string;
+}
 
-export const import_logs = sqliteTable('import_logs', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	import_id: text('import_id').notNull().references(() => imports.id),
-	type: text('type').notNull(),
-	message: text('message').notNull(),
-	created_at: text('created_at').notNull().$defaultFn(() => new Date().toISOString())
-});
+export interface AppSettingDoc {
+	_id: string;
+	value: string;
+}
 
-export const app_settings = sqliteTable('app_settings', {
-	key: text('key').primaryKey(),
-	value: text('value').notNull()
-});
-
-export const import_templates = sqliteTable('import_templates', {
-	id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-	name: text('name').notNull(),
-	folder_structure: text('folder_structure').notNull(),
-	rename_files: integer('rename_files').default(0),
-	verify_checksums: integer('verify_checksums').default(1),
-	detect_duplicates: integer('detect_duplicates').default(1)
-});
+export interface ImportTemplateDoc {
+	_id: string;
+	name: string;
+	folder_structure: string;
+	rename_files: boolean;
+	verify_checksums: boolean;
+	detect_duplicates: boolean;
+}

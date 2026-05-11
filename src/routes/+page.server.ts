@@ -1,52 +1,49 @@
-import { db } from '$lib/server/db';
-import { projects, imports, sd_cards, files } from '$lib/server/db/schema';
-import { desc, count, sum, eq } from 'drizzle-orm';
+import { getCollections, mapId } from '$lib/server/db';
 
 export async function load() {
-	const recentProjects = await db
-		.select()
-		.from(projects)
-		.orderBy(desc(projects.created_at))
-		.limit(5);
+	const { projects, sd_cards, imports } = await getCollections();
 
-	const recentSdCards = await db
-		.select()
-		.from(sd_cards)
-		.orderBy(desc(sd_cards.created_at))
-		.limit(5);
+	const [recentProjects, recentSdCards, recentImportDocs] = await Promise.all([
+		projects.find().sort({ created_at: -1 }).limit(5).toArray(),
+		sd_cards.find().sort({ created_at: -1 }).limit(5).toArray(),
+		imports.find().sort({ started_at: -1 }).limit(5).toArray()
+	]);
 
-	const recentImports = await db
-		.select({
-			id: imports.id,
-			status: imports.status,
-			started_at: imports.started_at,
-			completed_at: imports.completed_at,
-			file_count: imports.file_count,
-			total_size: imports.total_size,
-			error_count: imports.error_count,
-			project_name: projects.name,
-			sd_card_label: sd_cards.label
-		})
-		.from(imports)
-		.leftJoin(projects, eq(imports.project_id, projects.id))
-		.leftJoin(sd_cards, eq(imports.sd_card_id, sd_cards.id))
-		.orderBy(desc(imports.started_at))
-		.limit(5);
+	const projectIds = [...new Set(recentImportDocs.map((i) => i.project_id))];
+	const sdCardIds = [...new Set(recentImportDocs.map((i) => i.sd_card_id))];
 
-	const [projectCount] = await db.select({ value: count() }).from(projects);
-	const [importCount] = await db.select({ value: count() }).from(imports);
-	const [fileCount] = await db.select({ value: count() }).from(files);
-	const [totalSize] = await db.select({ value: sum(imports.total_size) }).from(imports);
+	const [projectDocs, sdCardDocs] = await Promise.all([
+		projects.find({ _id: { $in: projectIds } }).toArray(),
+		sd_cards.find({ _id: { $in: sdCardIds } }).toArray()
+	]);
+
+	const projectMap = Object.fromEntries(projectDocs.map((p) => [p._id, p.name]));
+	const sdCardMap = Object.fromEntries(sdCardDocs.map((c) => [c._id, c.label]));
+
+	const [projectCount, importCount, fileCount] = await Promise.all([
+		projects.countDocuments(),
+		imports.countDocuments(),
+		(await getCollections()).files.countDocuments()
+	]);
+
+	const sizeResult = await imports
+		.aggregate([{ $group: { _id: null, total: { $sum: '$total_size' } } }])
+		.toArray();
+	const totalSize = (sizeResult[0] as { total?: number } | undefined)?.total ?? 0;
 
 	return {
-		recentProjects,
-		recentSdCards,
-		recentImports,
+		recentProjects: recentProjects.map(mapId),
+		recentSdCards: recentSdCards.map(mapId),
+		recentImports: recentImportDocs.map((imp) => ({
+			...mapId(imp),
+			project_name: projectMap[imp.project_id] ?? null,
+			sd_card_label: sdCardMap[imp.sd_card_id] ?? null
+		})),
 		stats: {
-			projects: projectCount.value,
-			imports: importCount.value,
-			files: fileCount.value,
-			totalSizeGb: totalSize.value ? (Number(totalSize.value) / 1024 / 1024 / 1024).toFixed(1) : '0'
+			projects: projectCount,
+			imports: importCount,
+			files: fileCount,
+			totalSizeGb: (totalSize / 1073741824).toFixed(1)
 		}
 	};
 }
