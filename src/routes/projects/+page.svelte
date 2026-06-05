@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
 
 	let { data } = $props();
 
@@ -7,6 +9,30 @@
 	let newName = $state('');
 	let newNotes = $state('');
 	let deleteId = $state<string | null>(null);
+
+	// Live-Suche und Live-Filter: URL via goto() aktualisieren, Fokus + Scroll bleiben erhalten
+	let searchTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function navigateWithForm(form: HTMLFormElement) {
+		const formData = new FormData(form);
+		const params = new URLSearchParams();
+		for (const [key, val] of formData.entries()) {
+			if (typeof val === 'string' && val.length > 0) params.set(key, val);
+		}
+		const url = params.toString() ? `${$page.url.pathname}?${params}` : $page.url.pathname;
+		goto(url, { keepFocus: true, noScroll: true, replaceState: true });
+	}
+
+	function debouncedSubmit(e: Event) {
+		const form = (e.target as HTMLElement).closest('form');
+		if (!form) return;
+		clearTimeout(searchTimer);
+		searchTimer = setTimeout(() => navigateWithForm(form), 400);
+	}
+	function instantSubmit(e: Event) {
+		const form = (e.target as HTMLElement).closest('form');
+		if (form) navigateWithForm(form);
+	}
 
 	function formatSize(bytes: number | string | null) {
 		if (!bytes) return '—';
@@ -76,11 +102,13 @@
 				name="q"
 				type="search"
 				value={data.search}
+				oninput={debouncedSubmit}
 				placeholder="Projekte durchsuchen (Name)..."
 				class="flex-1 min-w-[220px] border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 			/>
 			<select
 				name="sort"
+				onchange={instantSubmit}
 				class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 			>
 				<option value="newest" selected={data.sort === 'newest'}>Neueste zuerst</option>
@@ -92,6 +120,7 @@
 			<span class="text-xs text-gray-500 uppercase tracking-wide">Filter:</span>
 			<select
 				name="camera"
+				onchange={instantSubmit}
 				class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 			>
 				<option value="">Alle Kameras</option>
@@ -101,6 +130,7 @@
 			</select>
 			<select
 				name="lens"
+				onchange={instantSubmit}
 				class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 			>
 				<option value="">Alle Objektive</option>
