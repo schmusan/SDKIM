@@ -45,7 +45,10 @@
 						class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required />
 				</div>
 				<div>
-					<label class="block text-sm text-gray-600 mb-1">Seriennummer (optional)</label>
+					<label class="block text-sm text-gray-600 mb-1 flex items-center gap-1">
+						Seriennummer (optional)
+						<span class="text-gray-300 cursor-help" title="Seriennummer der physischen SD-Karte. Hilft, dieselbe Karte später wiederzuerkennen, auch wenn das Label geändert wird.">ⓘ</span>
+					</label>
 					<input name="serial" type="text" placeholder="z.B. SD-20240001"
 						class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
 				</div>

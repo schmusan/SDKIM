@@ -129,7 +129,7 @@
 		</a>
 		{#if projectId}
 			<a
-				href="/projects/{projectId}"
+				href="/projects/{projectId}?imported=1"
 				class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
 			>
 				Zum Projekt →

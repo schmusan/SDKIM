@@ -1,11 +1,17 @@
 <script lang="ts">
+	import { page } from '$app/stores';
+
 	let { data, form } = $props();
 
-	let projectId = $state('');
+	// Aus Evaluation: Projekt-Vorauswahl aus URL ?project=ID
+	const prefilledProject = $page.url.searchParams.get('project') ?? '';
+
+	let projectId = $state(prefilledProject);
 	let newProjectName = $state('');
 	let sdCardIds = $state<string[]>(['']);
 	let newSdLabel = $state('');
 	let newSdSerial = $state('');
+	let newSdLens = $state('');
 	let verifyChecksums = $state(true);
 	let detectDuplicates = $state(true);
 	let showFolderPreview = $state(false);
@@ -26,6 +32,12 @@
 		<h1 class="text-2xl font-bold text-gray-900">Import starten</h1>
 		<p class="text-sm text-gray-500 mt-1">Konfiguriere den Import deiner SD-Karten</p>
 	</div>
+
+	{#if prefilledProject && data.allProjects.find((p) => p.id === prefilledProject)}
+		<div class="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-md">
+			Projekt aus der Detailansicht übernommen: <strong>{data.allProjects.find((p) => p.id === prefilledProject)?.name}</strong>
+		</div>
+	{/if}
 
 	{#if form?.error}
 		<div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-md">
@@ -104,7 +116,7 @@
 			{/each}
 
 			{#if sdCardIds.includes('new')}
-				<div class="grid grid-cols-2 gap-3 pt-1">
+				<div class="grid grid-cols-3 gap-3 pt-1">
 					<div>
 						<label class="block text-xs text-gray-500 mb-1">Label</label>
 						<input
@@ -116,12 +128,28 @@
 						/>
 					</div>
 					<div>
-						<label class="block text-xs text-gray-500 mb-1">Seriennummer (optional)</label>
+						<label class="block text-xs text-gray-500 mb-1 flex items-center gap-1">
+							Seriennummer
+							<span class="text-gray-300 cursor-help" title="Optional — Seriennummer der physischen SD-Karte. Hilft, dieselbe Karte später wiederzuerkennen, wenn das Label später geändert wird.">ⓘ</span>
+						</label>
 						<input
 							name="new_sd_serial"
 							type="text"
 							bind:value={newSdSerial}
 							placeholder="z.B. SD-20240001"
+							class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+						/>
+					</div>
+					<div>
+						<label class="block text-xs text-gray-500 mb-1 flex items-center gap-1">
+							Objektiv (manuell)
+							<span class="text-gray-300 cursor-help" title="Optional — wird in den Importmetadaten ergänzt, falls die SD-Karte/Kamera keine EXIF-Objektivinformation mitliefert (z.B. Altobjektive ohne Elektronik).">ⓘ</span>
+						</label>
+						<input
+							name="new_sd_lens"
+							type="text"
+							bind:value={newSdLens}
+							placeholder="z.B. 24-70mm f/2.8"
 							class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 						/>
 					</div>
@@ -162,7 +190,11 @@
 
 		<!-- Template speichern -->
 		<div class="bg-white rounded-lg border border-gray-200 p-5">
-			<h2 class="font-semibold text-gray-800 mb-3">Als Vorlage speichern (optional)</h2>
+			<h2 class="font-semibold text-gray-800 mb-1 flex items-center gap-2">
+				Als Vorlage speichern (optional)
+				<span class="text-gray-300 cursor-help text-sm" title="Vorlagen speichern die aktuellen Importoptionen (Verifizierung, Duplikatserkennung, Ordnerstruktur) unter einem Namen. Beim nächsten Import kannst du die Vorlage aus den Einstellungen auswählen, statt alles neu zu konfigurieren.">ⓘ</span>
+			</h2>
+			<p class="text-xs text-gray-500 mb-3">Sichert die aktuellen Optionen unter einem Namen für spätere Importe.</p>
 			<input
 				name="template_name"
 				type="text"
@@ -170,7 +202,7 @@
 				placeholder="z.B. Standard-Videoproduktion"
 				class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 			/>
-			<p class="text-xs text-gray-400 mt-1">Leer lassen um nicht zu speichern</p>
+			<p class="text-xs text-gray-400 mt-1">Leer lassen, um nichts zu speichern.</p>
 		</div>
 
 		<div class="flex justify-end">

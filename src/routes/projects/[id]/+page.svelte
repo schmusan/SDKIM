@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 
 	let { data } = $props();
 
@@ -8,6 +9,14 @@
 	let editNotes = $state(data.project.notes ?? '');
 	let selectedFile = $state<typeof data.projectFiles[0] | null>(null);
 	let activeTab = $state<'files' | 'imports' | 'logs'>('files');
+
+	// Aus Evaluation: Filter und Suche innerhalb des Projekts
+	let fileSearch = $state('');
+	let cameraFilter = $state<string>('');
+	let lensFilter = $state<string>('');
+
+	// Aus Evaluation: Success-Banner nach Import
+	let showImportToast = $state($page.url.searchParams.get('imported') === '1');
 
 	const totalSize = data.projectImports.reduce((s, i) => s + (i.total_size ?? 0), 0);
 	const totalFiles = data.projectImports.reduce((s, i) => s + (i.file_count ?? 0), 0);
@@ -35,6 +44,24 @@
 		return acc;
 	}, {});
 
+	const cameraOptions = [...new Set(data.projectFiles.map((f) => f.exif_camera_model).filter(Boolean))] as string[];
+	const lensOptions = [...new Set(data.projectFiles.map((f) => f.exif_focal_length).filter(Boolean))] as string[];
+
+	const filteredFiles = $derived(
+		data.projectFiles.filter((f) => {
+			const matchSearch = !fileSearch || f.filename.toLowerCase().includes(fileSearch.toLowerCase());
+			const matchCamera = !cameraFilter || f.exif_camera_model === cameraFilter;
+			const matchLens = !lensFilter || f.exif_focal_length === lensFilter;
+			return matchSearch && matchCamera && matchLens;
+		})
+	);
+
+	function resetFilters() {
+		fileSearch = '';
+		cameraFilter = '';
+		lensFilter = '';
+	}
+
 	const logColors: Record<string, string> = {
 		info: 'text-blue-600',
 		warning: 'text-yellow-600',
@@ -43,6 +70,20 @@
 </script>
 
 <div class="space-y-6">
+	<!-- Aus Evaluation: Toast nach erfolgreichem Import -->
+	{#if showImportToast}
+		<div class="bg-green-50 border border-green-200 rounded-lg px-4 py-3 flex items-start justify-between gap-4">
+			<div class="flex items-center gap-3">
+				<div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center text-green-600">✓</div>
+				<div>
+					<p class="text-sm font-medium text-green-900">Import erfolgreich abgeschlossen</p>
+					<p class="text-xs text-green-700 mt-0.5">Die Dateien wurden diesem Projekt zugeordnet.</p>
+				</div>
+			</div>
+			<button onclick={() => (showImportToast = false)} class="text-green-600 hover:text-green-800 text-lg leading-none">×</button>
+		</div>
+	{/if}
+
 	<!-- Header -->
 	<div class="flex items-start justify-between">
 		<div class="min-w-0">
@@ -70,7 +111,7 @@
 		{#if !editing}
 			<div class="flex gap-2 shrink-0 ml-4">
 				<button onclick={() => editing = true} class="border border-gray-300 text-gray-600 hover:bg-gray-50 text-sm px-3 py-2 rounded-md transition-colors">Bearbeiten</button>
-				<a href="/import" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors">+ Import starten</a>
+				<a href="/import?project={data.project.id}" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors">+ Import starten</a>
 			</div>
 		{/if}
 	</div>
@@ -147,8 +188,43 @@
 			{#if data.projectFiles.length === 0}
 				<p class="px-5 py-10 text-sm text-gray-400 text-center">Noch keine Dateien importiert.</p>
 			{:else}
+				<!-- Aus Evaluation: Filter und Suche -->
+				<div class="px-5 py-3 border-b border-gray-100 flex flex-wrap items-center gap-3 bg-gray-50">
+					<div class="flex-1 min-w-[200px]">
+						<input
+							type="text"
+							bind:value={fileSearch}
+							placeholder="Datei suchen..."
+							class="w-full border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+						/>
+					</div>
+					{#if cameraOptions.length > 0}
+						<select bind:value={cameraFilter} class="border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+							<option value="">Alle Kameras</option>
+							{#each cameraOptions as cam}
+								<option value={cam}>{cam}</option>
+							{/each}
+						</select>
+					{/if}
+					{#if lensOptions.length > 0}
+						<select bind:value={lensFilter} class="border border-gray-300 rounded-md px-3 py-1.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+							<option value="">Alle Objektive</option>
+							{#each lensOptions as lens}
+								<option value={lens}>{lens}</option>
+							{/each}
+						</select>
+					{/if}
+					{#if fileSearch || cameraFilter || lensFilter}
+						<button onclick={resetFilters} class="text-xs text-blue-600 hover:underline shrink-0">Filter zurücksetzen</button>
+					{/if}
+					<span class="text-xs text-gray-500 ml-auto shrink-0">{filteredFiles.length} von {data.projectFiles.length}</span>
+				</div>
+
 				<div class="divide-y divide-gray-50">
-					{#each data.projectFiles.slice(0, 50) as file}
+					{#if filteredFiles.length === 0}
+						<p class="px-5 py-10 text-sm text-gray-400 text-center">Keine Dateien entsprechen den Filtern.</p>
+					{/if}
+					{#each filteredFiles.slice(0, 50) as file}
 						<button
 							onclick={() => selectedFile = selectedFile?.id === file.id ? null : file}
 							class="w-full text-left px-5 py-3 hover:bg-gray-50 transition-colors"
@@ -181,8 +257,8 @@
 							{/if}
 						</button>
 					{/each}
-					{#if data.projectFiles.length > 50}
-						<p class="px-5 py-3 text-xs text-gray-400 text-center">… und {data.projectFiles.length - 50} weitere Dateien</p>
+					{#if filteredFiles.length > 50}
+						<p class="px-5 py-3 text-xs text-gray-400 text-center">… und {filteredFiles.length - 50} weitere Dateien</p>
 					{/if}
 				</div>
 			{/if}

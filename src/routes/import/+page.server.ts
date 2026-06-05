@@ -35,6 +35,7 @@ export const actions = {
 		const sdCardIds = data.getAll('sd_card_ids') as string[];
 		const newSdLabel = (data.get('new_sd_label') as string)?.trim();
 		const newSdSerial = (data.get('new_sd_serial') as string)?.trim() || null;
+		const newSdLens = (data.get('new_sd_lens') as string)?.trim() || null;
 
 		const resolvedSdCardIds: string[] = [];
 		for (const id of sdCardIds) {
@@ -87,7 +88,7 @@ export const actions = {
 				error_count: 0
 			});
 
-			const sampleFiles = generateSampleFiles(importId, verifyChecksums, detectDuplicates);
+			const sampleFiles = generateSampleFiles(importId, verifyChecksums, detectDuplicates, newSdLens);
 			if (sampleFiles.length > 0) await files.insertMany(sampleFiles as FileDoc[]);
 
 			const totalSize = sampleFiles.reduce((s, f) => s + f.size, 0);
@@ -127,7 +128,7 @@ export const actions = {
 	}
 };
 
-function generateSampleFiles(importId: string, verify: boolean, detectDupes: boolean) {
+function generateSampleFiles(importId: string, verify: boolean, detectDupes: boolean, manualLens: string | null = null) {
 	const cameras = ['SonyA7IV', 'SonyA7III', 'CanonR5'];
 	const extensions = ['MP4', 'MP4', 'MP4', 'JPG', 'ARW'];
 	const count = Math.floor(Math.random() * 30) + 10;
@@ -150,7 +151,7 @@ function generateSampleFiles(importId: string, verify: boolean, detectDupes: boo
 			exif_camera_model: cam,
 			exif_iso: Math.floor(Math.random() * 3200) + 100,
 			exif_shutter: `1/${Math.floor(Math.random() * 500) + 50}`,
-			exif_focal_length: `${[24, 35, 50, 70, 85][Math.floor(Math.random() * 5)]}mm`,
+			exif_focal_length: manualLens || `${[24, 35, 50, 70, 85][Math.floor(Math.random() * 5)]}mm`,
 			is_duplicate: isDuplicate,
 			created_at: new Date().toISOString()
 		};
