@@ -9,6 +9,7 @@
 	let projectId = $state(prefilledProject);
 	let newProjectName = $state('');
 	let sdCardIds = $state<string[]>(['']);
+	let cameraId = $state('');
 	let newSdLabel = $state('');
 	let newSdSerial = $state('');
 	let newSdLens = $state('');
@@ -17,12 +18,15 @@
 	let showFolderPreview = $state(false);
 	let templateName = $state('');
 
+	const selectedCameraModel = $derived(
+		data.allCameras.find((c) => c.id === cameraId)?.model ?? null
+	);
+
 	function addSdCard() { sdCardIds = [...sdCardIds, '']; }
 	function removeSdCard(i: number) { sdCardIds = sdCardIds.filter((_, idx) => idx !== i); }
 
 	function folderPreview() {
-		const cam = 'SonyA7IV';
-		const date = new Date().toISOString().slice(0, 10);
+		const cam = selectedCameraModel?.replace(/\s+/g, '') ?? 'SonyA7IV';
 		return `${newProjectName || 'Projektname'}/\n├── ${cam}_24mm/\n│   ├── ${cam}_0001.MP4\n│   └── ${cam}_0002.ARW\n└── ${cam}_70mm/\n    └── ${cam}_0003.MP4`;
 	}
 </script>
@@ -155,6 +159,35 @@
 					</div>
 				</div>
 			{/if}
+		</div>
+
+		<!-- Kameraprofil -->
+		<div class="bg-white rounded-lg border border-gray-200 p-5 space-y-3">
+			<h2 class="font-semibold text-gray-800 flex items-center gap-2">
+				Kameraprofil
+				<span class="text-gray-300 cursor-help text-sm" title="Optional — wählt das Kameraprofil, das den importierten Dateien zugeordnet wird. Setzt den Kameramodell-Wert in den Metadaten konsistent. Ohne Auswahl werden Kameras aus EXIF/Demo-Daten gelesen.">ⓘ</span>
+			</h2>
+			<div>
+				<label class="block text-sm text-gray-600 mb-1" for="camera_id">Kamera auswählen (optional)</label>
+				<select
+					id="camera_id"
+					name="camera_id"
+					bind:value={cameraId}
+					class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+				>
+					<option value="">— Keine Auswahl (Auto / Demo) —</option>
+					{#each data.allCameras as cam}
+						<option value={cam.id}>{cam.model}</option>
+					{/each}
+				</select>
+				{#if data.allCameras.length === 0}
+					<p class="text-xs text-gray-400 mt-1">
+						Noch keine Kameraprofile angelegt — <a href="/cameras" class="text-blue-600 hover:underline">jetzt eines anlegen</a>.
+					</p>
+				{:else if selectedCameraModel}
+					<p class="text-xs text-blue-600 mt-1">Alle Dateien dieses Imports werden <strong>{selectedCameraModel}</strong> zugeordnet.</p>
+				{/if}
+			</div>
 		</div>
 
 		<!-- Optionen -->

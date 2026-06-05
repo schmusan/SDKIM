@@ -3,15 +3,17 @@ import type { FileDoc } from '$lib/server/db/schema';
 import { redirect, fail } from '@sveltejs/kit';
 
 export async function load() {
-	const { projects, sd_cards, import_templates } = await getCollections();
-	const [allProjects, allSdCards, allTemplates] = await Promise.all([
+	const { projects, sd_cards, cameras, import_templates } = await getCollections();
+	const [allProjects, allSdCards, allCameras, allTemplates] = await Promise.all([
 		projects.find().sort({ created_at: -1 }).toArray(),
 		sd_cards.find().sort({ created_at: -1 }).toArray(),
+		cameras.find().sort({ model: 1 }).toArray(),
 		import_templates.find().toArray()
 	]);
 	return {
 		allProjects: allProjects.map(mapId),
 		allSdCards: allSdCards.map(mapId),
+		allCameras: allCameras.map(mapId),
 		allTemplates: allTemplates.map(mapId)
 	};
 }
@@ -19,8 +21,16 @@ export async function load() {
 export const actions = {
 	default: async ({ request }) => {
 		const data = await request.formData();
-		const { projects, sd_cards, imports, files, import_logs, import_templates } =
+		const { projects, sd_cards, cameras, imports, files, import_logs, import_templates } =
 			await getCollections();
+
+		// Kameraprofil auflösen (optional)
+		const cameraId = (data.get('camera_id') as string) || null;
+		let selectedCamera: { _id: string; model: string } | null = null;
+		if (cameraId) {
+			const cam = await cameras.findOne({ _id: cameraId });
+			if (cam) selectedCamera = { _id: cam._id, model: cam.model };
+		}
 
 		// Projekt anlegen falls neu
 		let projectId = data.get('project_id') as string;
@@ -88,7 +98,7 @@ export const actions = {
 				error_count: 0
 			});
 
-			const sampleFiles = generateSampleFiles(importId, verifyChecksums, detectDuplicates, newSdLens);
+			const sampleFiles = generateSampleFiles(importId, verifyChecksums, detectDuplicates, newSdLens, selectedCamera);
 			if (sampleFiles.length > 0) await files.insertMany(sampleFiles as FileDoc[]);
 
 			const totalSize = sampleFiles.reduce((s, f) => s + f.size, 0);
@@ -128,16 +138,28 @@ export const actions = {
 	}
 };
 
-function generateSampleFiles(importId: string, verify: boolean, detectDupes: boolean, manualLens: string | null = null) {
-	const cameras = ['SonyA7IV', 'SonyA7III', 'CanonR5'];
+function generateSampleFiles(
+	importId: string,
+	verify: boolean,
+	detectDupes: boolean,
+	manualLens: string | null = null,
+	selectedCamera: { _id: string; model: string } | null = null
+) {
+	const fallbackCameras = ['SonyA7IV', 'SonyA7III', 'CanonR5'];
 	const extensions = ['MP4', 'MP4', 'MP4', 'JPG', 'ARW'];
 	const count = Math.floor(Math.random() * 30) + 10;
 	const seen = new Set<string>();
 
+	// Wenn ein Kameraprofil gewählt wurde: alle Files dieser Kamera zuordnen.
+	// Sonst: zufällige Kameras aus Fallback-Liste (Demo-Verhalten).
 	return Array.from({ length: count }, (_, i) => {
-		const cam = cameras[Math.floor(Math.random() * cameras.length)];
+		const cam = selectedCamera
+			? selectedCamera.model
+			: fallbackCameras[Math.floor(Math.random() * fallbackCameras.length)];
+		const camId = selectedCamera ? selectedCamera._id : null;
+		const slug = cam.replace(/\s+/g, '');
 		const ext = extensions[Math.floor(Math.random() * extensions.length)];
-		const filename = `${cam}_${String(i + 1).padStart(4, '0')}.${ext}`;
+		const filename = `${slug}_${String(i + 1).padStart(4, '0')}.${ext}`;
 		const isDuplicate = detectDupes && seen.has(filename);
 		seen.add(filename);
 
@@ -145,9 +167,10 @@ function generateSampleFiles(importId: string, verify: boolean, detectDupes: boo
 			_id: crypto.randomUUID(),
 			import_id: importId,
 			filename,
-			path: `/media/${cam}/${filename}`,
+			path: `/media/${slug}/${filename}`,
 			size: ext === 'MP4' ? Math.random() * 2 * 1073741824 : Math.random() * 25 * 1048576,
 			checksum: verify ? crypto.randomUUID().replace(/-/g, '') : null,
+			camera_id: camId,
 			exif_camera_model: cam,
 			exif_iso: Math.floor(Math.random() * 3200) + 100,
 			exif_shutter: `1/${Math.floor(Math.random() * 500) + 50}`,
