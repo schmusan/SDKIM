@@ -1,5 +1,30 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+
 	let { data } = $props();
+
+	// "Kamera erkannt"-Simulation: erste Karte des Nutzers nehmen (falls vorhanden),
+	// sonst Demo-Label
+	let detectedCard = $derived(data.recentSdCards?.[0]?.label ?? 'Sony A7 IV (SD-20240001)');
+
+	let showCameraToast = $state(false);
+	let firstAutoTriggered = false;
+
+	function showDetected() {
+		showCameraToast = true;
+	}
+
+	onMount(() => {
+		// Auto-Trigger nur beim ersten Laden pro Session
+		if (typeof sessionStorage !== 'undefined' && !sessionStorage.getItem('sdkim_camera_toast_shown')) {
+			const timer = setTimeout(() => {
+				showCameraToast = true;
+				sessionStorage.setItem('sdkim_camera_toast_shown', '1');
+				firstAutoTriggered = true;
+			}, 15_000);
+			return () => clearTimeout(timer);
+		}
+	});
 
 	function formatDate(iso: string) {
 		return new Date(iso).toLocaleDateString('de-CH', {
@@ -31,32 +56,65 @@
 </script>
 
 <div class="space-y-8">
+	<!-- "Kamera erkannt"-Toast -->
+	{#if showCameraToast}
+		<div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-start justify-between gap-4 shadow-sm">
+			<div class="flex items-center gap-3">
+				<div class="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-lg shrink-0" aria-hidden="true">
+					<!-- Kamera-SVG -->
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-5 h-5">
+						<path d="M3 7a2 2 0 0 1 2-2h2.5l1.2-1.7A2 2 0 0 1 10.4 2.5h3.2c.6 0 1.2.3 1.6.8L16.5 5H19a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+						<circle cx="12" cy="13" r="3.6"/>
+					</svg>
+				</div>
+				<div>
+					<p class="text-sm font-medium text-blue-900">Kamera / SD-Karte erkannt</p>
+					<p class="text-xs text-blue-700 mt-0.5"><strong>{detectedCard}</strong> ist bereit zum Import.</p>
+				</div>
+			</div>
+			<div class="flex items-center gap-2 shrink-0">
+				<a href="/import" class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md transition-colors">Import starten →</a>
+				<button onclick={() => (showCameraToast = false)} class="text-blue-600 hover:text-blue-800 text-xl leading-none px-1">×</button>
+			</div>
+		</div>
+	{/if}
+
 	<div class="flex items-center justify-between">
 		<div>
 			<h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
 			<p class="text-sm text-gray-500 mt-1">Übersicht über Projekte und Importe</p>
 		</div>
-		<a
-			href="/import"
-			class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
-		>
-			+ Import starten
-		</a>
+		<div class="flex items-center gap-2">
+			<button
+				onclick={showDetected}
+				title="Kamera-/SD-Karten-Erkennung simulieren"
+				aria-label="Kamera-Erkennung simulieren"
+				class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-5 h-5">
+					<path d="M3 7a2 2 0 0 1 2-2h2.5l1.2-1.7A2 2 0 0 1 10.4 2.5h3.2c.6 0 1.2.3 1.6.8L16.5 5H19a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+					<circle cx="12" cy="13" r="3.6"/>
+				</svg>
+			</button>
+			<a
+				href="/import"
+				class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+			>
+				+ Import starten
+			</a>
+		</div>
 	</div>
 
 	<!-- Stats -->
 	<div class="grid grid-cols-4 gap-4">
 		{#each [
-			{ label: 'Projekte', value: data.stats.projects, icon: '▤' },
-			{ label: 'Importe', value: data.stats.imports, icon: '↓' },
-			{ label: 'Dateien', value: data.stats.files, icon: '◻' },
-			{ label: 'Gesamt', value: data.stats.totalSizeGb + ' GB', icon: '⊠' }
+			{ label: 'Projekte', value: data.stats.projects },
+			{ label: 'Importe', value: data.stats.imports },
+			{ label: 'Dateien', value: data.stats.files },
+			{ label: 'Gesamtgrösse', value: data.stats.totalSizeGb + ' GB' }
 		] as stat}
 			<div class="bg-white rounded-lg border border-gray-200 p-5">
-				<div class="flex items-center justify-between">
-					<span class="text-xs text-gray-400 uppercase tracking-wide">{stat.label}</span>
-					<span class="text-gray-300 text-xl">{stat.icon}</span>
-				</div>
+				<span class="text-xs text-gray-400 uppercase tracking-wide">{stat.label}</span>
 				<p class="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
 			</div>
 		{/each}
