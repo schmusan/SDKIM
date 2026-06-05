@@ -69,24 +69,57 @@
 		</div>
 	{/if}
 
-	<!-- Suche & Sort -->
-	<form method="GET" class="flex gap-3">
-		<input
-			name="q"
-			type="search"
-			value={data.search}
-			placeholder="Projekte durchsuchen..."
-			class="flex-1 border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-		/>
-		<select
-			name="sort"
-			onchange={(e) => (e.target as HTMLSelectElement).form?.submit()}
-			class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-		>
-			<option value="newest" selected={data.sort === 'newest'}>Neueste zuerst</option>
-			<option value="name" selected={data.sort === 'name'}>Name A–Z</option>
-		</select>
-		<button type="submit" class="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm px-4 py-2 rounded-md transition-colors">Suchen</button>
+	<!-- Suche, Filter & Sort -->
+	<form method="GET" class="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
+		<div class="flex gap-3 flex-wrap">
+			<input
+				name="q"
+				type="search"
+				value={data.search}
+				placeholder="Projekte durchsuchen (Name)..."
+				class="flex-1 min-w-[220px] border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+			/>
+			<select
+				name="sort"
+				class="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+			>
+				<option value="newest" selected={data.sort === 'newest'}>Neueste zuerst</option>
+				<option value="name" selected={data.sort === 'name'}>Name A–Z</option>
+			</select>
+			<button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors">Suchen</button>
+		</div>
+		<div class="flex gap-3 flex-wrap items-center">
+			<span class="text-xs text-gray-500 uppercase tracking-wide">Filter:</span>
+			<select
+				name="camera"
+				class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+			>
+				<option value="">Alle Kameras</option>
+				{#each data.cameraOptions as cam}
+					<option value={cam} selected={data.cameraFilter === cam}>{cam}</option>
+				{/each}
+			</select>
+			<select
+				name="lens"
+				class="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+			>
+				<option value="">Alle Objektive</option>
+				{#each data.lensOptions as lens}
+					<option value={lens} selected={data.lensFilter === lens}>{lens}</option>
+				{/each}
+			</select>
+			{#if data.search || data.cameraFilter || data.lensFilter}
+				<a href="/projects" class="text-xs text-blue-600 hover:underline">Alle Filter zurücksetzen</a>
+			{/if}
+			{#if data.cameraFilter || data.lensFilter}
+				<span class="text-xs text-gray-500 ml-auto">
+					Zeigt nur Projekte mit Dateien von
+					{data.cameraFilter ? `Kamera "${data.cameraFilter}"` : ''}
+					{data.cameraFilter && data.lensFilter ? ' und ' : ''}
+					{data.lensFilter ? `Objektiv "${data.lensFilter}"` : ''}.
+				</span>
+			{/if}
+		</div>
 	</form>
 
 	<!-- Projektliste -->

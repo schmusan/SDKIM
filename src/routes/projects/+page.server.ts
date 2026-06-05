@@ -4,9 +4,43 @@ import { fail, redirect } from '@sveltejs/kit';
 export async function load({ url }) {
 	const search = url.searchParams.get('q') ?? '';
 	const sort = url.searchParams.get('sort') ?? 'newest';
-	const { projects, imports } = await getCollections();
+	const cameraFilter = url.searchParams.get('camera') ?? '';
+	const lensFilter = url.searchParams.get('lens') ?? '';
+	const { projects, imports, files } = await getCollections();
 
-	const filter = search ? { name: { $regex: search, $options: 'i' } } : {};
+	// Filteroptionen für Dropdowns (alle distinkten Kameras und Objektive aus den Files)
+	const [cameraOptionsRaw, lensOptionsRaw] = await Promise.all([
+		files.distinct('exif_camera_model'),
+		files.distinct('exif_focal_length')
+	]);
+	const cameraOptions = cameraOptionsRaw.filter((v): v is string => typeof v === 'string').sort();
+	const lensOptions = lensOptionsRaw.filter((v): v is string => typeof v === 'string').sort();
+
+	// Wenn nach Kamera oder Objektiv gefiltert wird:
+	// Files → Import-IDs → Project-IDs → Projekte
+	let projectIdRestriction: string[] | null = null;
+	if (cameraFilter || lensFilter) {
+		const fileMatch: Record<string, string> = {};
+		if (cameraFilter) fileMatch.exif_camera_model = cameraFilter;
+		if (lensFilter) fileMatch.exif_focal_length = lensFilter;
+		const matchingFiles = await files
+			.find(fileMatch, { projection: { import_id: 1 } })
+			.toArray();
+		const importIds = [...new Set(matchingFiles.map((f) => f.import_id))];
+		if (importIds.length === 0) {
+			projectIdRestriction = [];
+		} else {
+			const matchingImports = await imports
+				.find({ _id: { $in: importIds } }, { projection: { project_id: 1 } })
+				.toArray();
+			projectIdRestriction = [...new Set(matchingImports.map((i) => i.project_id))];
+		}
+	}
+
+	const filter: Record<string, unknown> = {};
+	if (search) filter.name = { $regex: search, $options: 'i' };
+	if (projectIdRestriction !== null) filter._id = { $in: projectIdRestriction };
+
 	const sortOpt = sort === 'name' ? { name: 1 as const } : { created_at: -1 as const };
 
 	const allProjects = await projects.find(filter).sort(sortOpt).toArray();
@@ -29,7 +63,11 @@ export async function load({ url }) {
 	return {
 		projects: allProjects.map((p) => ({ ...mapId(p), stats: statsMap[p._id] ?? null })),
 		search,
-		sort
+		sort,
+		cameraFilter,
+		lensFilter,
+		cameraOptions,
+		lensOptions
 	};
 }
 
