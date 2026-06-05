@@ -131,7 +131,7 @@ In der Sketch-Phase wurden drei Lösungsvarianten gegeneinander abgewogen:
   - 8 MongoDB-Collections: `projects`, `sd_cards`, `cameras`, `imports`, `files`, `import_logs`, `app_settings`, `import_templates`.
   - Alle Mutations laufen über **SvelteKit Form Actions** (Progressive Enhancement, kein separates API-Layer).
   - Aggregations (`$group`) für Statistiken werden direkt in MongoDB ausgeführt.
-- **Deployment:** Online auf Netlify (URL siehe Moodle-Abgabe).
+- **Deployment:** Online auf Netlify → **[https://sdkim.netlify.app](https://sdkim.netlify.app)**
 - **Besondere Entscheidungen:**
   - **Wechsel von SQLite (Drizzle) zu MongoDB Atlas** — Begründung: einfacheres Deployment auf Netlify (kein File-System für Functions), bessere Skalierbarkeit für dokumenten-orientierte Daten (Imports mit Dateilisten).
   - **Importe werden funktional simuliert** (keine echte FileSystem-API im Browser), inhaltlich aber vollständig: Datensätze werden erzeugt, Fehlerlogs geschrieben, Status durchlaufen.
@@ -139,7 +139,7 @@ In der Sketch-Phase wurden drei Lösungsvarianten gegeneinander abgewogen:
 
 ### 3.5 Validate
 
-- **URL der getesteten Version:** Deployed auf Netlify (V1.0), URL siehe Moodle-Abgabe.
+- **URL der getesteten Version:** **[https://sdkim.netlify.app](https://sdkim.netlify.app)** (V1.0)
 - **Ziele der Prüfung:**
   - Ist der Import-Workflow für die Zielgruppe **selbsterklärend**?
   - Werden **Statusmeldungen und Feedback** als ausreichend wahrgenommen?
