@@ -164,14 +164,14 @@ In der Sketch-Phase wurden drei Lösungsvarianten gegeneinander abgewogen:
 
 - **Zusammenfassung der Resultate:** Der Kern-Workflow (Import + Projektübersicht) ist für die Zielgruppe verständlich und der visuelle Eindruck stimmt. Die wichtigsten Defizite betreffen **Feedback nach Abschluss** (fehlende Erfolgsmeldung), **fehlende Filter** auf Datei-Ebene und **Unklarheiten bei Sekundär-Funktionen** (Vorlagen, Seriennummer).
 - **Abgeleitete Verbesserungen (priorisiert):**
-  1. **Erfolgs-/Toast-Meldung nach Import** (hoch) — schliesst klaffende Feedback-Lücke.
-  2. **Filter im Projekt-Detail** (Kamera/Objektiv) (hoch) — direkter Nutzerwunsch beider Tester.
-  3. **Volltext-Suche innerhalb eines Projekts** (mittel) — erweiterte Erwartungshaltung.
-  4. **Tooltips/Inline-Hilfe zu Import-Vorlagen und Seriennummer** (mittel) — beseitigt Verständnislücken.
-  5. **Projekt-Kontext beim Import-Start auto-vorwählen** (mittel) — verkürzt Wizard.
-  6. **Objektivfeld beim Import manuell ergänzbar** (niedrig) — Edge-Case für Altobjektive ohne EXIF.
+  1. ✅ **Erfolgs-/Toast-Meldung nach Import** (hoch) — schliesst klaffende Feedback-Lücke. *Umgesetzt: grüner Success-Banner auf Projekt-Detailseite via `?imported=1`.*
+  2. ✅ **Filter im Projekt-Detail** (Kamera/Objektiv) (hoch) — direkter Nutzerwunsch beider Tester. *Umgesetzt: Filter-Dropdowns oberhalb der Dateiliste.*
+  3. ✅ **Volltext-Suche innerhalb eines Projekts** (mittel) — erweiterte Erwartungshaltung. *Umgesetzt: Suchfeld auf Dateiebene in der Projekt-Detailansicht.*
+  4. ✅ **Tooltips/Inline-Hilfe zu Import-Vorlagen und Seriennummer** (mittel) — beseitigt Verständnislücken. *Umgesetzt: ⓘ-Tooltips an den entsprechenden Feldern.*
+  5. ✅ **Projekt-Kontext beim Import-Start auto-vorwählen** (mittel) — verkürzt Wizard. *Umgesetzt: `/import?project=ID` wird beim Aufruf aus der Projekt-Detailansicht vorbefüllt.*
+  6. ✅ **Objektivfeld beim Import manuell ergänzbar** (niedrig) — Edge-Case für Altobjektive ohne EXIF. *Umgesetzt: neues optionales Feld beim Erfassen einer neuen SD-Karte.*
 
-Die konkrete Umsetzung priorisierter Verbesserungen ist in Kap. 4 dokumentiert.
+Die konkrete Umsetzung dieser Verbesserungen ist zusätzlich in Kap. 4.11 dokumentiert.
 
 ## 4. Erweiterungen
 
@@ -228,10 +228,20 @@ Die konkrete Umsetzung priorisierter Verbesserungen ist in Kap. 4 dokumentiert.
 - **Referenz:** Commit `3a84c5f` (*Migrate database from SQLite/Drizzle to MongoDB*).
 
 ### 4.10 Anwendung formaler Use-Case-Methodik
-- **Beschreibung & Nutzen:** Strukturierte Use-Case-Beschreibungen (Akteur, Vorbedingung, Hauptablauf, Erweiterungen) als zusätzliches Artefakt aus dem Modul **Requirements Engineering**. Die Use Cases sind als GitHub Issues `UC-1` … `UC-N` dokumentiert und schaffen eine zusätzliche Brücke zwischen Anforderungs- und Implementierungssicht.
+- **Beschreibung & Nutzen:** Strukturierte Use-Case-Beschreibungen (Akteur, Vorbedingung, Hauptablauf, Erweiterungen) als zusätzliches Artefakt aus dem Modul **Requirements Engineering**. Die Use Cases sind als GitHub Issues `UC-1` … `UC-10` dokumentiert und schaffen eine zusätzliche Brücke zwischen Anforderungs- und Implementierungssicht.
 - **Wo umgesetzt:** GitHub Issues mit Label `use-case`, verlinkt im Anhang.
 - **Referenz:** siehe Kap. 7.
 - **Aus Evaluation abgeleitet?:** Nein, ergänzendes Artefakt zur Bewertungs-Position B-„Zusätzliche Methoden/Artefakte".
+
+### 4.11 Aus Evaluation umgesetzte Verbesserungen
+- **Beschreibung & Nutzen:** Alle sechs aus der Usability-Evaluation abgeleiteten Verbesserungen (siehe Kap. 3.5) wurden noch während der Projektlaufzeit direkt im Prototyp umgesetzt — vom Success-Banner über Datei-Filter und -Suche bis zu Tooltips und manuell ergänzbarem Objektivfeld.
+- **Wo umgesetzt:**
+  - **Projekt-Detailansicht:** Success-Banner (URL-Param `?imported=1`), Filter-Dropdowns für Kamera und Objektiv, Volltext-Suche über Dateinamen (`src/routes/projects/[id]/+page.svelte`).
+  - **Import-Wizard:** Projekt-Vorauswahl via `?project=ID`, neues optionales Objektivfeld, Tooltips an Seriennummer und Vorlage (`src/routes/import/+page.svelte` + Server-Action).
+  - **SD-Karten:** zusätzlicher Tooltip an der Seriennummer (`src/routes/sd-cards/+page.svelte`).
+  - **Confirm-Screen:** Weiterleitung zum Projekt setzt `?imported=1` für den Banner (`src/routes/import/confirm/+page.svelte`).
+- **Referenz:** Commit `3c091f2` (*Implement user feedback from usability evaluation*).
+- **Aus Evaluation abgeleitet?:** **Ja**, direkt aus den Feedback-Grids von Härri Basil und Aladin Kaermo (V1.0, 20.05.2026).
 
 ## 5. Projektorganisation
 
