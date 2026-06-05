@@ -69,7 +69,21 @@
 				</div>
 			</div>
 
-			<form method="POST" action="?/create" use:enhance={{ onResult: () => { showCreate = false; newModel = ''; newPattern = ''; } }} class="space-y-3">
+			<form
+				method="POST"
+				action="?/create"
+				use:enhance={() => {
+					return async ({ result, update }) => {
+						await update();
+						if (result.type === 'success') {
+							showCreate = false;
+							newModel = '';
+							newPattern = '';
+						}
+					};
+				}}
+				class="space-y-3"
+			>
 				<div class="grid grid-cols-2 gap-3">
 					<div>
 						<label class="block text-sm text-gray-600 mb-1">Kameramodell *</label>
@@ -107,7 +121,17 @@
 			{#each data.cameras as cam}
 				<div class="px-5 py-4">
 					{#if editingId === cam.id}
-						<form method="POST" action="?/update" use:enhance={{ onResult: () => { editingId = null; } }} class="space-y-3">
+						<form
+							method="POST"
+							action="?/update"
+							use:enhance={() => {
+								return async ({ result, update }) => {
+									await update();
+									if (result.type === 'success') editingId = null;
+								};
+							}}
+							class="space-y-3"
+						>
 							<input type="hidden" name="id" value={cam.id} />
 							<div class="grid grid-cols-2 gap-3">
 								<div>

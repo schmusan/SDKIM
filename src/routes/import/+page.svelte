@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import Tooltip from '$lib/components/Tooltip.svelte';
 
 	let { data, form } = $props();
 
@@ -197,10 +198,14 @@
 				{/each}
 
 				{#if sdCardIds.includes('new')}
-					<div class="grid grid-cols-3 gap-3 pt-1 border-t border-gray-100 mt-2">
+					<div class="grid grid-cols-2 gap-3 pt-1 border-t border-gray-100 mt-2">
 						<div>
-							<label class="block text-xs text-gray-500 mb-1 mt-3">Label</label>
+							<label class="text-xs text-gray-500 mb-1 mt-3 flex items-center gap-1.5" for="new_sd_label">
+								Label *
+								<Tooltip text="Sprechender Name für die SD-Karte (Pflicht). Erscheint später in Listen, im Import-Wizard und in der Karten-Verwaltung." />
+							</label>
 							<input
+								id="new_sd_label"
 								name="new_sd_label"
 								type="text"
 								bind:value={newSdLabel}
@@ -209,28 +214,16 @@
 							/>
 						</div>
 						<div>
-							<label class="block text-xs text-gray-500 mb-1 mt-3 flex items-center gap-1">
+							<label class="text-xs text-gray-500 mb-1 mt-3 flex items-center gap-1.5" for="new_sd_serial">
 								Seriennummer
-								<span class="text-gray-300 cursor-help" title="Optional — Seriennummer der physischen SD-Karte. Hilft, dieselbe Karte später wiederzuerkennen, wenn das Label später geändert wird.">ⓘ</span>
+								<Tooltip text="Optional. Seriennummer der physischen SD-Karte. Hilft, dieselbe Karte später wiederzuerkennen, auch wenn das Label geändert wird." />
 							</label>
 							<input
+								id="new_sd_serial"
 								name="new_sd_serial"
 								type="text"
 								bind:value={newSdSerial}
 								placeholder="z.B. SD-20240001"
-								class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-							/>
-						</div>
-						<div>
-							<label class="block text-xs text-gray-500 mb-1 mt-3 flex items-center gap-1">
-								Objektiv (manuell)
-								<span class="text-gray-300 cursor-help" title="Optional — wird in den Importmetadaten ergänzt, falls die SD-Karte/Kamera keine EXIF-Objektivinformation mitliefert (z.B. Altobjektive ohne Elektronik).">ⓘ</span>
-							</label>
-							<input
-								name="new_sd_lens"
-								type="text"
-								bind:value={newSdLens}
-								placeholder="z.B. 24-70mm f/2.8"
 								class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 							/>
 						</div>
@@ -244,13 +237,16 @@
 			<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
 				<div>
 					<h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-						Schritt 3 — Kameraprofil
-						<span class="text-gray-300 cursor-help text-sm" title="Wählt das Kameraprofil, das den importierten Dateien zugeordnet wird. Setzt den Kameramodell-Wert in den Metadaten konsistent. Ohne Auswahl werden Kameras aus EXIF/Demo-Daten gelesen.">ⓘ</span>
+						Schritt 3 — Kamera & Objektiv
+						<Tooltip text="Wählt das Kameraprofil, das den importierten Dateien zugeordnet wird. Setzt den Kameramodell-Wert in den Metadaten konsistent. Ohne Auswahl werden Kameras aus EXIF/Demo-Daten gelesen." />
 					</h2>
-					<p class="text-sm text-gray-500 mt-0.5">Optional — alle Dateien dieses Imports werden der gewählten Kamera zugeordnet.</p>
+					<p class="text-sm text-gray-500 mt-0.5">Optional — alle Dateien dieses Imports werden der gewählten Kamera (und ggf. dem Objektiv) zugeordnet.</p>
 				</div>
 				<div>
-					<label class="block text-sm text-gray-600 mb-1" for="camera_id">Kamera auswählen</label>
+					<label class="block text-sm text-gray-600 mb-1 flex items-center gap-1.5" for="camera_id">
+						Kamera auswählen
+						<Tooltip text="Wählt aus den unter /cameras angelegten Profilen. Wenn keines passt, lege zuerst dort eines an." />
+					</label>
 					<select
 						id="camera_id"
 						name="camera_id"
@@ -269,6 +265,20 @@
 					{:else if selectedCameraModel}
 						<p class="text-xs text-blue-600 mt-1">Alle Dateien dieses Imports werden <strong>{selectedCameraModel}</strong> zugeordnet.</p>
 					{/if}
+				</div>
+				<div>
+					<label class="block text-sm text-gray-600 mb-1 flex items-center gap-1.5" for="new_sd_lens">
+						Objektiv (optional)
+						<Tooltip text="Wird allen importierten Dateien als Brennweite/Objektiv-Wert zugewiesen. Nützlich für Altobjektive ohne EXIF, oder wenn alle Aufnahmen mit demselben Objektiv gemacht wurden." />
+					</label>
+					<input
+						id="new_sd_lens"
+						name="new_sd_lens"
+						type="text"
+						bind:value={newSdLens}
+						placeholder="z.B. 24-70mm f/2.8"
+						class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+					/>
 				</div>
 			</div>
 		</div>
@@ -312,7 +322,7 @@
 				<div class="pt-4 border-t border-gray-100">
 					<label class="block text-sm font-medium text-gray-800 mb-1 flex items-center gap-2" for="template_name">
 						Als Vorlage speichern (optional)
-						<span class="text-gray-300 cursor-help text-sm" title="Vorlagen speichern die aktuellen Importoptionen unter einem Namen. Beim nächsten Import kannst du die Vorlage aus den Einstellungen auswählen, statt alles neu zu konfigurieren.">ⓘ</span>
+						<Tooltip text="Vorlagen speichern die aktuellen Importoptionen unter einem Namen. Beim nächsten Import kannst du die Vorlage aus den Einstellungen auswählen, statt alles neu zu konfigurieren." />
 					</label>
 					<input
 						id="template_name"
@@ -371,17 +381,17 @@
 								{#if sdCardIds.includes('new') && newSdSerial}
 									<p class="text-xs text-gray-500 mt-1">Seriennummer: {newSdSerial}</p>
 								{/if}
-								{#if sdCardIds.includes('new') && newSdLens}
-									<p class="text-xs text-gray-500">Objektiv: {newSdLens}</p>
-								{/if}
 							{/if}
 						</dd>
 					</div>
 
 					<div class="grid grid-cols-3 gap-4 px-4 py-3 bg-gray-50">
-						<dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Kameraprofil</dt>
-						<dd class="col-span-2 text-sm text-gray-900">
-							{selectedCameraModel ?? 'Keine Auswahl (Auto / Demo)'}
+						<dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Kamera & Objektiv</dt>
+						<dd class="col-span-2 text-sm text-gray-900 space-y-0.5">
+							<p>{selectedCameraModel ?? 'Keine Auswahl (Auto / Demo)'}</p>
+							{#if newSdLens}
+								<p class="text-xs text-gray-500">Objektiv: {newSdLens}</p>
+							{/if}
 						</dd>
 					</div>
 

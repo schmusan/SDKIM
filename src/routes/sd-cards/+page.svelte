@@ -38,7 +38,15 @@
 	{#if showCreate}
 		<div class="bg-white rounded-lg border border-gray-200 p-5">
 			<h2 class="font-semibold text-gray-800 mb-4">Neue SD-Karte erfassen</h2>
-			<form method="POST" action="?/create" use:enhance={{ onResult: () => { showCreate = false; } }} class="grid grid-cols-2 gap-3">
+			<form
+				method="POST"
+				action="?/create"
+				use:enhance={() => async ({ result, update }) => {
+					await update();
+					if (result.type === 'success') showCreate = false;
+				}}
+				class="grid grid-cols-2 gap-3"
+			>
 				<div>
 					<label class="block text-sm text-gray-600 mb-1">Label *</label>
 					<input name="label" type="text" placeholder="z.B. SonyA7IV_Karte1"
@@ -72,7 +80,15 @@
 					<!-- Karten-Header -->
 					<div class="px-5 py-4 flex items-center justify-between">
 						{#if editingId === card.id}
-							<form method="POST" action="?/update" use:enhance={{ onResult: () => { editingId = null; } }} class="flex gap-2 flex-1 mr-4">
+							<form
+								method="POST"
+								action="?/update"
+								use:enhance={() => async ({ result, update }) => {
+									await update();
+									if (result.type === 'success') editingId = null;
+								}}
+								class="flex gap-2 flex-1 mr-4"
+							>
 								<input type="hidden" name="id" value={card.id} />
 								<input name="label" value={card.label} placeholder="Label"
 									class="flex-1 border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" required />

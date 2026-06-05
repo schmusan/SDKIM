@@ -180,7 +180,15 @@
 
 		{#if showCreate}
 			<div class="px-5 py-4 border-b border-gray-100 bg-gray-50">
-				<form method="POST" action="?/createTemplate" use:enhance={{ onResult: () => { showCreate = false; } }} class="space-y-3">
+				<form
+					method="POST"
+					action="?/createTemplate"
+					use:enhance={() => async ({ result, update }) => {
+						await update();
+						if (result.type === 'success') showCreate = false;
+					}}
+					class="space-y-3"
+				>
 					<div class="grid grid-cols-2 gap-3">
 						<div>
 							<label class="block text-xs text-gray-500 mb-1">Name *</label>
