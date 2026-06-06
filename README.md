@@ -173,7 +173,7 @@ Ein eigenes Designsystem mit Indigo-Markenfarbe, Inter-Font, weichen Schatten un
 
 ### 6.1 KI-Tools
 
-**Eingesetztes Tool:** Code — ein KI-Assistent in Visual Studio Code. Ich habe ihn punktuell für einzelne, klar abgegrenzte Aufgaben genutzt.
+**Eingesetztes Tool:** Claude (als Plugin in Visual Studio Code). Ich habe es punktuell für einzelne, klar abgegrenzte Aufgaben genutzt.
 
 **Was ich selbst gemacht habe (Grundlagen):**
 - Konzept und Vorgehen: Problem, Zielgruppe, Lösungsidee, Figma-Mockup
@@ -183,7 +183,7 @@ Ein eigenes Designsystem mit Indigo-Markenfarbe, Inter-Font, weichen Schatten un
 - Ein erstes lauffähiges Import-Formular und einfache Übersichts-Seiten (Dashboard, Projekte, SD-Karten, Kameras, Einstellungen)
 - CRUD-Form-Actions (Anlegen, Bearbeiten, Löschen)
 
-**Wo ich Code (KI) für die Erweiterungen genutzt habe:**
+**Wo ich Claude für die Erweiterungen genutzt habe:**
 - **Import-Workflow:** Umbau vom langen Formular zum 3-Schritt-Wizard, Unterstützung für mehrere SD-Karten gleichzeitig, Tile-Auswahl mit Aktiv-Status, Step-Indicator, Übergabe von Daten per URL-Parameter.
 - **Projektfilter und Suche:** Server-seitige Aggregation `files → imports → projects` für die Filter nach Kamera und Objektiv, dazu die Live-Suche ohne Submit-Button.
 - **SD-Karten-Simulation:** Der Erkennungs-Toast im Dashboard mit zufälligen Karten aus einer Liste von 50 Full-Frame-Kameras, jeweils passendes Objektiv und Seriennummer, Übergabe an den Import per URL.
