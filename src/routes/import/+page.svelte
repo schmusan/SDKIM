@@ -253,139 +253,182 @@
 
 				<!-- Registrierte Karten -->
 				<!-- Manuelle Karte hinzufügen — Dropdown bei vorhandenen Karten, offen bei leerem State -->
-				<div class="rounded-lg border {hasAnyCard ? 'border-dashed border-gray-300' : 'border-blue-200 bg-blue-50/40'}">
+				<div
+					class="rounded-2xl overflow-hidden transition-all"
+					style={hasAnyCard
+						? 'background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);'
+						: 'background:linear-gradient(180deg, color-mix(in srgb, var(--color-brand-50) 70%, var(--color-surface)) 0%, var(--color-surface) 100%); border:1px solid var(--color-brand-100); box-shadow:var(--shadow-soft);'}
+				>
 					{#if !hasAnyCard}
-						<div class="px-4 pt-4 pb-2 flex items-start gap-3">
-							<div class="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 shrink-0">
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-5 h-5">
-									<circle cx="12" cy="12" r="10"/>
-									<line x1="12" y1="8" x2="12" y2="12"/>
-									<line x1="12" y1="16" x2="12.01" y2="16"/>
+						<div class="px-6 pt-5 pb-4 flex items-center gap-3.5">
+							<div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:var(--color-brand-500); color:#fff;">
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+									<rect x="7" y="3" width="10" height="18" rx="2"/>
+									<line x1="10" y1="7" x2="10" y2="9"/>
+									<line x1="14" y1="7" x2="14" y2="9"/>
 								</svg>
 							</div>
 							<div>
-								<p class="text-sm font-semibold text-blue-900">Keine weiteren SD-Karten erkannt</p>
-								<p class="text-xs text-blue-700 mt-0.5">Möchtest du eine Karte manuell hinzufügen?</p>
+								<p class="text-[15px] font-semibold tracking-tight" style="color:var(--color-brand-900)">Keine weiteren SD-Karten erkannt</p>
+								<p class="text-[13px] mt-0.5" style="color:var(--color-brand-700)">Füge eine Karte unten manuell hinzu.</p>
 							</div>
 						</div>
 					{:else}
 						<button
 							type="button"
 							onclick={() => (showManualForm = !showManualForm)}
-							class="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:text-blue-600 flex items-center justify-between"
+							class="w-full text-left px-6 py-4 flex items-center justify-between transition-colors"
 							aria-expanded={showManualForm}
+							style="color:var(--color-ink-700)"
+							onmouseenter={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--color-brand-500)'}
+							onmouseleave={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--color-ink-700)'}
 						>
-							<span>+ Weitere Karte manuell hinzufügen</span>
-							<span class="text-gray-400 text-xs transition-transform {showManualForm ? 'rotate-180' : ''}">▾</span>
+							<span class="flex items-center gap-2.5">
+								<span class="w-7 h-7 rounded-lg flex items-center justify-center text-[15px] font-medium" style="background:var(--color-ink-50); color:var(--color-ink-600)">+</span>
+								<span class="text-[14px] font-medium">Weitere Karte manuell hinzufügen</span>
+							</span>
+							<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 transition-transform duration-200 {showManualForm ? 'rotate-180' : ''}" style="color:var(--color-ink-400)">
+								<polyline points="6 9 12 15 18 9"/>
+							</svg>
 						</button>
 					{/if}
 					{#if formOpen}
-						<div class="px-4 py-3 border-t {hasAnyCard ? 'border-dashed border-gray-200' : 'border-blue-100'} space-y-2">
-						<div class="grid grid-cols-2 gap-2">
-							<div>
-								<label class="text-xs text-gray-500 mb-1 flex items-center gap-1.5" for="manual_label">
-									Label *
-									<Tooltip text="Sprechender Name. Wenn er auf ein Kameramodell hindeutet (z.B. 'Sony A7 IV'), wird das automatisch übernommen." />
-								</label>
-								<input
-									type="text"
-									placeholder="z.B. SonyA7IV_Karte1"
-									id="manual_label"
-									class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-								/>
+						<div class="px-6 py-5 space-y-4" style={hasAnyCard ? 'border-top:1px solid var(--color-stroke)' : 'border-top:1px solid var(--color-brand-100)'}>
+							<!-- Eingabe-Grid -->
+							<div class="grid grid-cols-2 gap-4">
+								<div class="space-y-1.5">
+									<label class="text-[12px] font-medium flex items-center gap-1.5" style="color:var(--color-ink-500)" for="manual_label">
+										Label <span style="color:var(--color-brand-500)">*</span>
+										<Tooltip text="Sprechender Name. Wenn er auf ein Kameramodell hindeutet (z.B. 'Sony A7 IV'), wird das automatisch übernommen." />
+									</label>
+									<input
+										type="text"
+										placeholder="z.B. SonyA7IV_Karte1"
+										id="manual_label"
+										class="w-full rounded-lg px-3.5 py-2.5 text-[14px] transition-all"
+										style="background:var(--color-surface); border:1px solid var(--color-stroke-strong); color:var(--color-ink-900);"
+										onfocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brand-500)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 4px var(--color-brand-100)'; (e.currentTarget as HTMLElement).style.outline = 'none'; }}
+										onblur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-stroke-strong)'; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
+									/>
+								</div>
+								<div class="space-y-1.5">
+									<label class="text-[12px] font-medium block" style="color:var(--color-ink-500)" for="manual_serial">
+										Seriennummer <span style="color:var(--color-ink-300)">(optional)</span>
+									</label>
+									<input
+										type="text"
+										placeholder="z.B. SD-20240001"
+										id="manual_serial"
+										class="w-full rounded-lg px-3.5 py-2.5 text-[14px] font-mono transition-all"
+										style="background:var(--color-surface); border:1px solid var(--color-stroke-strong); color:var(--color-ink-900);"
+										onfocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brand-500)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 4px var(--color-brand-100)'; (e.currentTarget as HTMLElement).style.outline = 'none'; }}
+										onblur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-stroke-strong)'; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
+									/>
+								</div>
 							</div>
-							<div>
-								<label class="text-xs text-gray-500 mb-1 block" for="manual_serial">Seriennummer (optional)</label>
-								<input
-									type="text"
-									placeholder="z.B. SD-20240001"
-									id="manual_serial"
-									class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-								/>
+							<div class="grid grid-cols-2 gap-4">
+								<div class="space-y-1.5">
+									<label class="text-[12px] font-medium flex items-center gap-1.5" style="color:var(--color-ink-500)" for="manual_camera">
+										Kameraprofil
+										<Tooltip text="Nur nötig, wenn das Label nicht selbst schon das Kameramodell verrät." />
+									</label>
+									<select
+										id="manual_camera"
+										class="w-full rounded-lg px-3.5 py-2.5 text-[14px] transition-all appearance-none bg-no-repeat"
+										style="background:var(--color-surface) url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%2212%22 viewBox=%220 0 24 24%22 fill=%22none%22 stroke=%22%238E8E93%22 stroke-width=%222.2%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22><polyline points=%226 9 12 15 18 9%22/></svg>') right 14px center/12px no-repeat; border:1px solid var(--color-stroke-strong); color:var(--color-ink-900); padding-right:36px;"
+										onfocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brand-500)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 4px var(--color-brand-100)'; (e.currentTarget as HTMLElement).style.outline = 'none'; }}
+										onblur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-stroke-strong)'; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
+									>
+										<option value="">— aus Label ableiten —</option>
+										{#each data.allCameras as cam}
+											<option value={cam.id}>{cam.model}</option>
+										{/each}
+									</select>
+								</div>
+								<div class="space-y-1.5">
+									<label class="text-[12px] font-medium block" style="color:var(--color-ink-500)" for="manual_lens">
+										Objektiv <span style="color:var(--color-ink-300)">(optional)</span>
+									</label>
+									<input
+										type="text"
+										placeholder="z.B. 24-70mm f/2.8"
+										id="manual_lens"
+										class="w-full rounded-lg px-3.5 py-2.5 text-[14px] transition-all"
+										style="background:var(--color-surface); border:1px solid var(--color-stroke-strong); color:var(--color-ink-900);"
+										onfocus={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brand-500)'; (e.currentTarget as HTMLElement).style.boxShadow = '0 0 0 4px var(--color-brand-100)'; (e.currentTarget as HTMLElement).style.outline = 'none'; }}
+										onblur={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-stroke-strong)'; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
+									/>
+								</div>
 							</div>
-						</div>
-						<div class="grid grid-cols-2 gap-2">
-							<div>
-								<label class="text-xs text-gray-500 mb-1 flex items-center gap-1.5" for="manual_camera">
-									Kameraprofil
-									<Tooltip text="Nur nötig, wenn das Label nicht selbst schon das Kameramodell verrät." />
-								</label>
-								<select
-									id="manual_camera"
-									class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-								>
-									<option value="">— aus Label ableiten —</option>
-									{#each data.allCameras as cam}
-										<option value={cam.id}>{cam.model}</option>
-									{/each}
-								</select>
-							</div>
-							<div>
-								<label class="text-xs text-gray-500 mb-1 block" for="manual_lens">Objektiv</label>
-								<input
-									type="text"
-									placeholder="z.B. 24-70mm f/2.8"
-									id="manual_lens"
-									class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-								/>
-							</div>
-						</div>
-						<!-- Versteckter Datei-/Ordner-Picker -->
-						<input
-							type="file"
-							id="sd_picker"
-							webkitdirectory
-							class="hidden"
-							onchange={(e) => {
-								const target = e.currentTarget as HTMLInputElement;
-								const files = target.files;
-								if (!files || files.length === 0) return;
-								// Erster File-Pfad enthält den Ordnernamen
-								const first = files[0] as File & { webkitRelativePath?: string };
-								const folderName = first.webkitRelativePath?.split('/')[0] ?? first.name;
-								const labelEl = document.getElementById('manual_label') as HTMLInputElement | null;
-								if (labelEl && !labelEl.value.trim()) labelEl.value = folderName;
-								target.value = '';
-							}}
-						/>
-						<div class="flex gap-2">
-							<button
-								type="button"
-								onclick={() => document.getElementById('sd_picker')?.click()}
-								class="flex-1 border border-gray-300 hover:border-blue-400 text-gray-700 hover:text-blue-600 text-sm font-medium px-4 py-2 rounded-md transition-colors flex items-center justify-center gap-2"
-								title="Ordner der SD-Karte im Finder/Explorer wählen"
-							>
-								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-4 h-4">
-									<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-								</svg>
-								SD-Karte im Finder auswählen
-							</button>
-							<button
-								type="button"
-								onclick={() => {
+
+							<!-- Versteckter Ordner-Picker -->
+							<input
+								type="file"
+								id="sd_picker"
+								webkitdirectory
+								class="hidden"
+								onchange={(e) => {
+									const target = e.currentTarget as HTMLInputElement;
+									const files = target.files;
+									if (!files || files.length === 0) return;
+									const first = files[0] as File & { webkitRelativePath?: string };
+									const folderName = first.webkitRelativePath?.split('/')[0] ?? first.name;
 									const labelEl = document.getElementById('manual_label') as HTMLInputElement | null;
-									const serialEl = document.getElementById('manual_serial') as HTMLInputElement | null;
-									const cameraEl = document.getElementById('manual_camera') as HTMLSelectElement | null;
-									const lensEl = document.getElementById('manual_lens') as HTMLInputElement | null;
-									if (labelEl?.value.trim()) {
-										const card: NewCard = {
-											label: labelEl.value.trim(),
-											serial: serialEl?.value.trim() ?? '',
-											lens: lensEl?.value.trim() ?? '',
-											selected: true,
-											cameraOverride: cameraEl?.value || undefined
-										};
-										newCards = [...newCards, card];
-										labelEl.value = '';
-										if (serialEl) serialEl.value = '';
-										if (cameraEl) cameraEl.value = '';
-										if (lensEl) lensEl.value = '';
-									}
+									if (labelEl && !labelEl.value.trim()) labelEl.value = folderName;
+									target.value = '';
 								}}
-								class="flex-1 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
-							>+ Karte hinzufügen</button>
+							/>
+
+							<!-- Aktionsleiste -->
+							<div class="flex items-center gap-3 pt-1">
+								<button
+									type="button"
+									onclick={() => document.getElementById('sd_picker')?.click()}
+									class="flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-medium transition-all"
+									style="background:var(--color-surface); border:1px solid var(--color-stroke-strong); color:var(--color-ink-700); box-shadow:var(--shadow-soft);"
+									onmouseenter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brand-500)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-brand-500)'; }}
+									onmouseleave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-stroke-strong)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-ink-700)'; }}
+									title="Ordner der SD-Karte im Finder wählen"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+										<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+									</svg>
+									Im Finder auswählen
+								</button>
+
+								<div class="flex-1"></div>
+
+								<button
+									type="button"
+									onclick={() => {
+										const labelEl = document.getElementById('manual_label') as HTMLInputElement | null;
+										const serialEl = document.getElementById('manual_serial') as HTMLInputElement | null;
+										const cameraEl = document.getElementById('manual_camera') as HTMLSelectElement | null;
+										const lensEl = document.getElementById('manual_lens') as HTMLInputElement | null;
+										if (labelEl?.value.trim()) {
+											const card: NewCard = {
+												label: labelEl.value.trim(),
+												serial: serialEl?.value.trim() ?? '',
+												lens: lensEl?.value.trim() ?? '',
+												selected: true,
+												cameraOverride: cameraEl?.value || undefined
+											};
+											newCards = [...newCards, card];
+											labelEl.value = '';
+											if (serialEl) serialEl.value = '';
+											if (cameraEl) cameraEl.value = '';
+											if (lensEl) lensEl.value = '';
+										}
+									}}
+									class="rounded-full px-5 py-2.5 text-[13.5px] font-semibold text-white transition-all"
+									style="background:var(--color-brand-500); box-shadow:var(--shadow-soft);"
+									onmouseenter={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-600)'}
+									onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-500)'}
+								>
+									Karte hinzufügen
+								</button>
+							</div>
 						</div>
-					</div>
 					{/if}
 				</div>
 
