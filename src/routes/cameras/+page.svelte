@@ -216,23 +216,39 @@
 								{:else}
 									<div class="divide-y divide-gray-100">
 										{#each cam.imports as imp}
-											<a
-												href="/projects/{imp.project_name ? '' : ''}"
-												class="flex items-center justify-between px-5 py-3 hover:bg-white transition-colors"
-											>
-												<div class="min-w-0">
-													<p class="text-sm font-medium text-gray-800 truncate">
-														{imp.project_name ?? '— ohne Projekt —'}
-													</p>
-													<p class="text-xs text-gray-500 mt-0.5">
-														SD-Karte: <span class="font-mono">{imp.sd_card_label ?? '—'}</span> · {formatDate(imp.started_at)}
-													</p>
+											<div class="px-5 py-3">
+												<div class="flex items-center justify-between">
+													<div class="min-w-0">
+														<p class="text-sm font-medium text-gray-800 truncate">
+															{imp.project_name ?? '— ohne Projekt —'}
+														</p>
+														<p class="text-xs text-gray-500 mt-0.5">
+															SD-Karte: <span class="font-mono">{imp.sd_card_label ?? '—'}</span> · {formatDate(imp.started_at)}
+														</p>
+													</div>
+													<div class="flex items-center gap-4 shrink-0 ml-4">
+														<span class="text-xs text-gray-600">{imp.file_count} Dateien</span>
+														<span class="text-xs text-gray-600">{formatSize(imp.total_size)}</span>
+													</div>
 												</div>
-												<div class="flex items-center gap-4 shrink-0 ml-4">
-													<span class="text-xs text-gray-600">{imp.file_count} Dateien</span>
-													<span class="text-xs text-gray-600">{formatSize(imp.total_size)}</span>
-												</div>
-											</a>
+
+												<!-- Datei-Sub-Liste -->
+												{#if imp.files && imp.files.length > 0}
+													<ul class="mt-3 pl-4 border-l-2 border-gray-200 space-y-1">
+														{#each imp.files as f}
+															<li class="flex items-center justify-between gap-3 text-[12.5px]" style="color:var(--color-ink-600)">
+																<span class="flex items-center gap-2 min-w-0">
+																	<span class="text-[10px] font-mono px-1.5 py-0.5 rounded shrink-0" style="background:var(--color-ink-50); color:var(--color-ink-500)">
+																		{f.filename.split('.').pop()?.toUpperCase() ?? '?'}
+																	</span>
+																	<span class="font-mono truncate">{f.filename}</span>
+																</span>
+																<span class="text-[11px] shrink-0" style="color:var(--color-ink-400)">{formatSize(f.size)}</span>
+															</li>
+														{/each}
+													</ul>
+												{/if}
+											</div>
 										{/each}
 									</div>
 								{/if}

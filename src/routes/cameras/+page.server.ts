@@ -34,7 +34,31 @@ export async function load() {
 	const projectMap = Object.fromEntries(projectDocs.map((p) => [p._id, p.name]));
 	const sdCardMap = Object.fromEntries(sdCardDocs.map((c) => [c._id, c.label]));
 
-	// pro Kamera: Liste der Imports + Aggregate
+	// Alle Files je Kamera + Import laden (für die Sub-Liste pro Import)
+	const allFiles = await files
+		.find(
+			{},
+			{ projection: { _id: 1, filename: 1, size: 1, import_id: 1, exif_camera_model: 1 } }
+		)
+		.toArray();
+
+	type FileRow = { id: string; filename: string; size: number };
+	const filesByImport: Record<string, FileRow[]> = {};
+	for (const f of allFiles) {
+		const importId = f.import_id as string;
+		if (!importId) continue;
+		(filesByImport[importId] ??= []).push({
+			id: f._id as string,
+			filename: f.filename as string,
+			size: (f.size as number) ?? 0
+		});
+	}
+	// Filenames innerhalb eines Imports natürlich sortieren
+	for (const list of Object.values(filesByImport)) {
+		list.sort((a, b) => a.filename.localeCompare(b.filename));
+	}
+
+	// pro Kamera: Liste der Imports + Aggregate (jetzt mit Files je Import)
 	type ImportRow = {
 		id: string;
 		project_name: string | null;
@@ -42,6 +66,7 @@ export async function load() {
 		started_at: string;
 		file_count: number;
 		total_size: number;
+		files: FileRow[];
 	};
 	const importsByCamera: Record<string, ImportRow[]> = {};
 	const totalsByCamera: Record<string, { imports: number; files: number; size: number }> = {};
@@ -59,7 +84,8 @@ export async function load() {
 			sd_card_label: sdCardMap[imp.sd_card_id] ?? null,
 			started_at: imp.started_at,
 			file_count: row.file_count as number,
-			total_size: row.total_size as number
+			total_size: row.total_size as number,
+			files: filesByImport[impId] ?? []
 		});
 		const totals = (totalsByCamera[cam] ??= { imports: 0, files: 0, size: 0 });
 		totals.imports += 1;
