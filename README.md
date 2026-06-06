@@ -70,7 +70,7 @@ Ich habe drei Varianten skizziert:
 
 ### 3.4 Prototype
 
-#### 3.4.1 Entwurf (Design)
+#### 3.4.1. Entwurf (Design)
 
 - **Informationsarchitektur:** Sidebar mit 7 Bereichen (Dashboard, Import, Projekte, SD-Karten, Kameras, Statistiken, Einstellungen). Der Import ist ein 3-Schritt-Wizard.
 - **Wichtige Screens:**
@@ -85,7 +85,7 @@ Ich habe drei Varianten skizziert:
   - **Wizard** weil der Import der zentrale Workflow ist
   - **Eigenes Designsystem** mit Indigo-Brand, Inter-Font und weichen Schatten (Details siehe `BRANDBOOK.md`)
 
-#### 3.4.2 Umsetzung (Technik)
+#### 3.4.2. Umsetzung (Technik)
 
 - **Stack:** SvelteKit 2 + Svelte 5 (Runes) mit TypeScript, Tailwind CSS 4, MongoDB Atlas, Chart.js 4, Netlify-Adapter.
 - **Struktur:** Routes liegen unter `src/routes/`. Die DB-Anbindung steckt in `src/lib/server/db/`. Hilfsdaten zu Kameras und Hersteller-Dateinamen in `src/lib/camera-data.ts`.
