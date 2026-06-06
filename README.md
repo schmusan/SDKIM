@@ -48,7 +48,7 @@ Bei Foto- und Videoprojekten kommen oft viele SD-Karten von verschiedenen Kamera
 
 Den Problemraum kenne ich aus eigener Erfahrung als Videograf. Typische Pain Points: Chaos beim Import, doppelte Dateien, manuelles Umbenennen, unklare Herkunft.
 
-- **Proto-Persona:** „Sandro", 28, Videograf in einer Agentur. Pro Auftrag 3–5 SD-Karten von zwei Kamerasystemen. Will schnell sehen, ob alles importiert ist.
+- **Proto-Persona:** „Sandro", 25, Videograf Selbstständig. Pro Auftrag 3–5 SD-Karten von zwei Kamerasystemen. Will schnell sehen, ob alles importiert ist.
 - **Erkenntnisse:** Wizard statt langes Formular. Die Quelle einer Datei ist genauso wichtig wie der Inhalt. Fehler müssen sichtbar werden.
 - **How Might We:** *Wie können wir SD-Karten so importieren, dass Dateien automatisch Kameras und Projekten zugeordnet werden und Fehler auffallen?*
 
