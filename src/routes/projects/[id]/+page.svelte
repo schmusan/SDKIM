@@ -29,7 +29,13 @@
 	}
 
 	function formatDate(iso: string) {
-		return new Date(iso).toLocaleDateString('de-CH', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+		return new Date(iso).toLocaleString('de-CH', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
+		});
 	}
 
 	const byCamera = data.projectFiles.reduce<Record<string, number>>((acc, f) => {

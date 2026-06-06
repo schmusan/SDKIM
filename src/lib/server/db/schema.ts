@@ -16,6 +16,7 @@ export interface CameraDoc {
 	_id: string;
 	model: string;
 	folder_pattern: string;
+	lenses?: string[];
 }
 
 export interface ImportDoc {

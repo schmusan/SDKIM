@@ -1,36 +1,88 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { pickRandomLens } from '$lib/camera-data';
 
 	let { data } = $props();
 
-	// "Kamera erkannt"-Simulation: erste Karte des Nutzers nehmen (falls vorhanden),
-	// sonst Demo-Label
-	let detectedCard = $derived(data.recentSdCards?.[0]?.label ?? 'Sony A7 IV (SD-20240001)');
+	// 50 reale Full-Frame-Kameramodelle für die Erkennungs-Simulation
+	const FULL_FRAME_CAMERAS = [
+		'Sony A7 IV', 'Sony A7 III', 'Sony A7R V', 'Sony A7R IV', 'Sony A7R III',
+		'Sony A7S III', 'Sony A7S II', 'Sony A7C', 'Sony A1', 'Sony A9 III',
+		'Sony A9 II', 'Sony FX3',
+		'Canon EOS R5', 'Canon EOS R5 C', 'Canon EOS R6 Mark II', 'Canon EOS R6',
+		'Canon EOS R8', 'Canon EOS R', 'Canon EOS RP', 'Canon EOS 1D X Mark III',
+		'Canon EOS 5D Mark IV', 'Canon EOS 6D Mark II',
+		'Nikon Z9', 'Nikon Z8', 'Nikon Z7 II', 'Nikon Z6 III', 'Nikon Z6 II',
+		'Nikon Z5', 'Nikon Zf', 'Nikon D850', 'Nikon D6', 'Nikon D780',
+		'Panasonic Lumix S5 II', 'Panasonic Lumix S5 IIX', 'Panasonic Lumix S1H',
+		'Panasonic Lumix S1', 'Panasonic Lumix S1R', 'Panasonic Lumix S9',
+		'Sigma fp', 'Sigma fp L',
+		'Leica SL3', 'Leica SL2', 'Leica SL2-S', 'Leica M11', 'Leica M11-P',
+		'Leica Q3', 'Leica Q2',
+		'Pentax K-1 Mark II',
+		'Hasselblad X2D 100C', 'Hasselblad X1D II 50C'
+	];
+
+	function randomSerial(): string {
+		return 'SD-' + Math.random().toString(36).slice(2, 10).toUpperCase();
+	}
+
+	type DetectedCard = { label: string; serial: string; lens: string };
+
+	function generateDetectedCards(): DetectedCard[] {
+		const count = Math.floor(Math.random() * 5) + 1; // 1 bis 5 Karten
+		const pool = [...FULL_FRAME_CAMERAS];
+		const picked: DetectedCard[] = [];
+		for (let i = 0; i < count && pool.length > 0; i++) {
+			const idx = Math.floor(Math.random() * pool.length);
+			const camera = pool.splice(idx, 1)[0];
+			picked.push({ label: camera, serial: randomSerial(), lens: pickRandomLens(camera) });
+		}
+		return picked;
+	}
+
+	let detectedCards = $state<DetectedCard[]>([]);
+
+	function regenerate() {
+		detectedCards = generateDetectedCards();
+	}
+
+	const importLink = $derived.by(() => {
+		if (detectedCards.length === 0) return '/import';
+		const params = new URLSearchParams();
+		for (const c of detectedCards) {
+			params.append('detected', `${c.label}|${c.serial}|${c.lens}`);
+		}
+		return `/import?${params}`;
+	});
 
 	let showCameraToast = $state(false);
-	let firstAutoTriggered = false;
 
 	function showDetected() {
+		regenerate();
 		showCameraToast = true;
 	}
 
 	onMount(() => {
+		// Direkt beim Mount neue Karten generieren (zufällig pro Seitenaufruf)
+		regenerate();
 		// Auto-Trigger nur beim ersten Laden pro Session
 		if (typeof sessionStorage !== 'undefined' && !sessionStorage.getItem('sdkim_camera_toast_shown')) {
 			const timer = setTimeout(() => {
 				showCameraToast = true;
 				sessionStorage.setItem('sdkim_camera_toast_shown', '1');
-				firstAutoTriggered = true;
-			}, 15_000);
+			}, 5_000);
 			return () => clearTimeout(timer);
 		}
 	});
 
 	function formatDate(iso: string) {
-		return new Date(iso).toLocaleDateString('de-CH', {
+		return new Date(iso).toLocaleString('de-CH', {
 			day: '2-digit',
 			month: '2-digit',
-			year: 'numeric'
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit'
 		});
 	}
 
@@ -67,14 +119,31 @@
 						<circle cx="12" cy="13" r="3.6"/>
 					</svg>
 				</div>
-				<div>
-					<p class="text-sm font-medium text-blue-900">Kamera / SD-Karte erkannt</p>
-					<p class="text-xs text-blue-700 mt-0.5"><strong>{detectedCard}</strong> ist bereit zum Import.</p>
+				<div class="min-w-0 flex-1">
+					<p class="text-sm font-medium text-blue-900">
+						{detectedCards.length} {detectedCards.length === 1 ? 'Karte' : 'Karten'} erkannt
+					</p>
+					<ul class="mt-1 space-y-0.5">
+						{#each detectedCards as c}
+							<li class="text-xs text-blue-700">
+								<strong>{c.label}</strong>
+								<span class="text-blue-500">· {c.lens}</span>
+								<span class="font-mono text-blue-400">({c.serial})</span>
+							</li>
+						{/each}
+					</ul>
 				</div>
 			</div>
 			<div class="flex items-center gap-2 shrink-0">
-				<a href="/import" class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md transition-colors">Import starten →</a>
-				<button onclick={() => (showCameraToast = false)} class="text-blue-600 hover:text-blue-800 text-xl leading-none px-1">×</button>
+				<button type="button" onclick={regenerate} title="Neue Karten simulieren" aria-label="Neu generieren" class="text-blue-500 hover:text-blue-700 p-1.5 rounded-md hover:bg-blue-100 transition-colors">
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+						<polyline points="23 4 23 10 17 10"/>
+						<polyline points="1 20 1 14 7 14"/>
+						<path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+					</svg>
+				</button>
+				<a href={importLink} class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md transition-colors">Alle importieren →</a>
+				<button onclick={() => (showCameraToast = false)} class="text-blue-600 hover:text-blue-800 text-xl leading-none px-1" aria-label="Schliessen">×</button>
 			</div>
 		</div>
 	{/if}

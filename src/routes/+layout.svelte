@@ -10,7 +10,7 @@
 		{ href: '/import', label: 'Import', icon: '↓' },
 		{ href: '/projects', label: 'Projekte', icon: '▤' },
 		{ href: '/sd-cards', label: 'SD-Karten', icon: '▪' },
-		{ href: '/cameras', label: 'Kamera-Profile', icon: '◎' },
+		{ href: '/cameras', label: 'Kameras', icon: '◎' },
 		{ href: '/statistics', label: 'Statistiken', icon: '↗' },
 		{ href: '/settings', label: 'Einstellungen', icon: '⚙' }
 	];
