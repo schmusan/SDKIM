@@ -173,7 +173,7 @@ Ein eigenes Designsystem mit Indigo-Markenfarbe, Inter-Font, weichen Schatten un
 
 ### 6.1 KI-Tools
 
-**Eingesetztes Tool:** Claude (als Plugin in Visual Studio Code). Ich habe es punktuell für einzelne, klar abgegrenzte Aufgaben genutzt.
+**Eingesetztes Tool:** Claude (als Plugin in Visual Studio Code). 
 
 **Was ich selbst gemacht habe (Grundlagen):**
 - Konzept und Vorgehen: Problem, Zielgruppe, Lösungsidee, Figma-Mockup
