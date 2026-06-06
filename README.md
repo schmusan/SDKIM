@@ -212,5 +212,7 @@ Beispiel: *„Ergänze die Projektübersicht um zwei Filter (Kamera und Objektiv
 - **Lizenzen:** SvelteKit, Svelte, Tailwind, Chart.js (MIT) · MongoDB Node Driver (Apache 2.0) · Inter Variable Font (OFL)
 - **Use Cases:** [Use-Case-Issues](https://github.com/schmusan/SDKIM/issues?q=label%3Ause-case)
 - **Designsystem:** `BRANDBOOK.md`
-- **Rohdaten Evaluation:** `Usability Evaluation_Basil Härri.pdf`, Feedback Aladin Kaermo (V1.0, 20.05.2026)
+- **Testaufgaben:** [`docs/SDKIM_Testaufgaben.pdf`](docs/SDKIM_Testaufgaben.pdf)
+- **Testvorlage:** [`docs/Uebung - Usability Evaluation.pdf`](docs/Uebung%20-%20Usability%20Evaluation.pdf)
+- **Rohdaten Evaluation:** [`docs/Usability Evaluation_Basil Härri.pdf`](docs/Usability%20Evaluation_Basil%20H%C3%A4rri.pdf), Feedback Aladin Kaermo (V1.0, 20.05.2026)
 - **Figma-Mockup:** [Figma-Prototyp](https://www.figma.com/proto/SWRKnCMjB0A3eLJZcAVIX8/Übung-10?node-id=10226-1443&t=mu2bnp1OgrTDd3zu-1)
