@@ -53,17 +53,20 @@
 	}
 </script>
 
-<div class="space-y-6">
-	<div class="flex items-center justify-between">
+<div class="space-y-8">
+	<div class="flex items-end justify-between">
 		<div>
-			<h1 class="text-2xl font-bold text-gray-900">Projekte</h1>
-			<p class="text-sm text-gray-500 mt-1">{data.projects.length} Projekt{data.projects.length !== 1 ? 'e' : ''}</p>
+			<h1 class="text-[32px] font-semibold leading-[1.15] tracking-tight" style="color:var(--color-ink-900)">Projekte</h1>
+			<p class="text-[15px] mt-1.5" style="color:var(--color-ink-500)">{data.projects.length} Projekt{data.projects.length !== 1 ? 'e' : ''} insgesamt.</p>
 		</div>
 		<button
 			onclick={() => showCreateForm = !showCreateForm}
-			class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+			class="rounded-full text-[14px] font-semibold px-5 py-2.5 text-white transition-all shadow-[var(--shadow-soft)]"
+			style="background:var(--color-brand-500)"
+			onmouseenter={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-600)'}
+			onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-500)'}
 		>
-			+ Neues Projekt
+			Neues Projekt
 		</button>
 	</div>
 
@@ -102,7 +105,7 @@
 	{/if}
 
 	<!-- Suche, Filter & Sort -->
-	<form method="GET" class="bg-white rounded-lg border border-gray-200 p-4 space-y-3">
+	<form method="GET" class="rounded-2xl p-5 space-y-3" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
 		<div class="flex gap-3 flex-wrap">
 			<input
 				name="q"
@@ -160,38 +163,39 @@
 
 	<!-- Projektliste -->
 	{#if data.projects.length === 0}
-		<div class="bg-white rounded-lg border border-gray-200 px-5 py-16 text-center">
-			<p class="text-gray-400 text-sm">
+		<div class="rounded-2xl px-5 py-20 text-center" style="background:var(--color-surface); border:1px solid var(--color-stroke);">
+			<p class="text-[14px]" style="color:var(--color-ink-400)">
 				{data.search ? `Keine Projekte für "${data.search}" gefunden.` : 'Noch keine Projekte vorhanden.'}
 			</p>
 		</div>
 	{:else}
-		<div class="bg-white rounded-lg border border-gray-200 divide-y divide-gray-100">
-			{#each data.projects as project}
-				<div class="px-5 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-					<div class="min-w-0">
-						<a href="/projects/{project.id}" class="text-sm font-medium text-gray-900 hover:text-blue-600">
+		<div class="rounded-2xl overflow-hidden" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
+			{#each data.projects as project, i}
+				<div class="px-6 py-4 flex items-center justify-between transition-colors" style={i > 0 ? 'border-top:1px solid var(--color-stroke);' : ''} onmouseenter={(e) => (e.currentTarget as HTMLElement).style.background = 'color-mix(in srgb, var(--color-ink-50) 35%, transparent)'} onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = ''}>
+					<div class="min-w-0 flex-1">
+						<a href="/projects/{project.id}" class="text-[15px] font-medium transition-colors" style="color:var(--color-ink-900)">
 							{project.name}
 						</a>
 						{#if project.notes}
-							<p class="text-xs text-gray-400 mt-0.5 truncate max-w-lg">{project.notes}</p>
+							<p class="text-[12.5px] mt-0.5 truncate max-w-2xl" style="color:var(--color-ink-400)">{project.notes}</p>
 						{/if}
-						<div class="flex gap-4 mt-1">
-							<span class="text-xs text-gray-400">Erstellt: {formatDate(project.created_at)}</span>
+						<div class="flex gap-4 mt-1.5 text-[12px]" style="color:var(--color-ink-400)">
+							<span>{formatDate(project.created_at)}</span>
 							{#if project.stats}
-								<span class="text-xs text-gray-400">{project.stats.import_count} Import{Number(project.stats.import_count) !== 1 ? 'e' : ''}</span>
-								<span class="text-xs text-gray-400">{project.stats.file_count ?? 0} Dateien</span>
-								<span class="text-xs text-gray-400">{formatSize(project.stats.total_size)}</span>
-							{:else}
-								<span class="text-xs text-gray-400">Noch keine Importe</span>
+								<span>·</span>
+								<span>{project.stats.import_count} Import{Number(project.stats.import_count) !== 1 ? 'e' : ''}</span>
+								<span>·</span>
+								<span>{project.stats.file_count ?? 0} Dateien</span>
+								<span>·</span>
+								<span>{formatSize(project.stats.total_size)}</span>
 							{/if}
 						</div>
 					</div>
-					<div class="flex items-center gap-3 ml-4 shrink-0">
-						<a href="/projects/{project.id}" class="text-xs text-blue-600 hover:underline">Öffnen</a>
+					<div class="flex items-center gap-4 ml-4 shrink-0">
+						<a href="/projects/{project.id}" class="text-[13px] font-medium" style="color:var(--color-brand-500)">Öffnen →</a>
 						<form method="POST" action="?/delete" use:enhance onsubmit={() => confirm('Projekt wirklich löschen?') || event?.preventDefault()}>
 							<input type="hidden" name="id" value={project.id} />
-							<button type="submit" class="text-xs text-red-400 hover:text-red-600">Löschen</button>
+							<button type="submit" class="text-[13px]" style="color:var(--color-ink-400)" onmouseenter={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--color-danger)'} onmouseleave={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--color-ink-400)'}>Löschen</button>
 						</form>
 					</div>
 				</div>

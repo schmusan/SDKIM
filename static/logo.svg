@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="SDKIM Logo">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7273F0"/>
+      <stop offset="1" stop-color="#4F4DCC"/>
+    </linearGradient>
+  </defs>
+  <!-- Apple-style squircle background -->
+  <path
+    fill="url(#g)"
+    d="M48 4c20.4 0 30.6 0 36.6 6S96 27.6 96 48s0 30.6-5.4 36.6S68.4 96 48 96s-30.6 0-36.6-5.4S0 68.4 0 48s0-30.6 6-36.6S27.6 4 48 4Z"
+  />
+  <!-- SD card silhouette with downward arrow -->
+  <g fill="none" stroke="#fff" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Card outline with notch -->
+    <path d="M30 28v40a4 4 0 0 0 4 4h28a4 4 0 0 0 4-4V32l-8-8H34a4 4 0 0 0-4 4Z"/>
+    <!-- Card pins (top) -->
+    <line x1="38" y1="36" x2="38" y2="40"/>
+    <line x1="46" y1="36" x2="46" y2="40"/>
+    <line x1="54" y1="36" x2="54" y2="40"/>
+    <!-- Downward import arrow inside card -->
+    <path d="M48 50v14"/>
+    <path d="M42 58l6 6 6-6"/>
+  </g>
+</svg>

@@ -118,26 +118,26 @@
 	}
 </script>
 
-<div class="max-w-3xl space-y-6">
+<div class="max-w-3xl space-y-7">
 	<div>
-		<h1 class="text-2xl font-bold text-gray-900">Import starten</h1>
-		<p class="text-sm text-gray-500 mt-1">Konfiguriere den Import deiner SD-Karten in 5 Schritten</p>
+		<h1 class="text-[32px] font-semibold leading-[1.15] tracking-tight" style="color:var(--color-ink-900)">Import starten</h1>
+		<p class="text-[15px] mt-1.5" style="color:var(--color-ink-500)">Konfiguriere den Import deiner SD-Karten in 3 Schritten.</p>
 	</div>
 
 	{#if prefilledProject && data.allProjects.find((p) => p.id === prefilledProject)}
-		<div class="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-2 rounded-md">
+		<div class="rounded-xl px-4 py-2.5 text-[13.5px]" style="background:var(--color-brand-50); border:1px solid var(--color-brand-100); color:var(--color-brand-700);">
 			Projekt aus der Detailansicht übernommen: <strong>{data.allProjects.find((p) => p.id === prefilledProject)?.name}</strong>
 		</div>
 	{/if}
 
 	{#if form?.error}
-		<div class="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-md">
+		<div class="rounded-xl px-4 py-3 text-[13.5px]" style="background:var(--color-danger-soft); border:1px solid color-mix(in srgb, var(--color-danger) 25%, transparent); color:var(--color-danger);">
 			{form.error}
 		</div>
 	{/if}
 
 	<!-- Step indicator -->
-	<div class="bg-white rounded-lg border border-gray-200 px-6 py-5">
+	<div class="rounded-2xl px-7 py-5" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
 		<ol class="flex items-center justify-between gap-2">
 			{#each steps as s, idx}
 				{@const done = step > s.n}
@@ -145,20 +145,28 @@
 				<li class="flex-1 flex items-center gap-3 min-w-0">
 					<div class="flex items-center gap-3 min-w-0">
 						<div
-							class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold shrink-0 transition-colors
-								{done ? 'bg-green-500 text-white' : active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}"
+							class="w-8 h-8 rounded-full flex items-center justify-center text-[13px] font-semibold shrink-0 transition-all duration-200"
+							style={done
+								? 'background:var(--color-success); color:#fff'
+								: active
+								? 'background:var(--color-brand-500); color:#fff'
+								: 'background:var(--color-ink-50); color:var(--color-ink-400)'}
 						>
 							{#if done}✓{:else}{s.n}{/if}
 						</div>
 						<span
-							class="text-sm font-medium truncate
-								{done ? 'text-green-700' : active ? 'text-gray-900' : 'text-gray-400'}"
+							class="text-[14px] font-medium truncate"
+							style={done
+								? 'color:var(--color-success)'
+								: active
+								? 'color:var(--color-ink-900)'
+								: 'color:var(--color-ink-400)'}
 						>
 							{s.label}
 						</span>
 					</div>
 					{#if idx < steps.length - 1}
-						<div class="flex-1 h-0.5 mx-2 rounded-full {done ? 'bg-green-500' : 'bg-gray-200'}"></div>
+						<div class="flex-1 h-[2px] mx-3 rounded-full transition-colors" style={done ? 'background:var(--color-success)' : 'background:var(--color-stroke)'}></div>
 					{/if}
 				</li>
 			{/each}
@@ -168,7 +176,7 @@
 	<form method="POST">
 		<!-- Step 1: SD-Karten als Karten-Auswahl -->
 		<div class:hidden={step !== 1}>
-			<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-6">
+			<div class="rounded-2xl p-7 space-y-6" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
 				<div>
 					<h2 class="text-lg font-semibold text-gray-900">Schritt 1 — SD-Karten</h2>
 					<p class="text-sm text-gray-500 mt-0.5">Wähle die Karten aus, die importiert werden sollen.</p>
@@ -404,7 +412,7 @@
 
 		<!-- Step 2: Projekt & Optionen (zusammengelegt) -->
 		<div class:hidden={step !== 2}>
-			<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
+			<div class="rounded-2xl p-7 space-y-5" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
 				<div>
 					<h2 class="text-lg font-semibold text-gray-900">Schritt 2 — Projekt & Optionen</h2>
 					<p class="text-sm text-gray-500 mt-0.5">Wähle das Zielprojekt und passe das Importverhalten an.</p>
@@ -494,7 +502,7 @@
 
 		<!-- Step 3: Übersicht / Bestätigung -->
 		<div class:hidden={step !== 3}>
-			<div class="bg-white rounded-lg border border-gray-200 p-6 space-y-5">
+			<div class="rounded-2xl p-7 space-y-5" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
 				<div>
 					<h2 class="text-lg font-semibold text-gray-900">Schritt 3 — Übersicht</h2>
 					<p class="text-sm text-gray-500 mt-0.5">Bitte prüfe deine Eingaben, bevor der Import gestartet wird.</p>
@@ -584,26 +592,33 @@
 				type="button"
 				onclick={prev}
 				disabled={step === 1}
-				class="border border-gray-300 text-gray-700 hover:bg-gray-50 text-sm font-medium px-4 py-2 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+				class="rounded-full text-[14px] font-semibold px-5 py-2.5 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+				style="background:var(--color-surface); border:1px solid var(--color-stroke-strong); color:var(--color-ink-700); box-shadow:var(--shadow-soft);"
 			>
 				← Zurück
 			</button>
 
-			<span class="text-xs text-gray-400">Schritt {step} von {steps.length}</span>
+			<span class="text-[12px]" style="color:var(--color-ink-400)">Schritt {step} von {steps.length}</span>
 
 			{#if step < 3}
 				<button
 					type="button"
 					onclick={next}
 					disabled={!canAdvance(step)}
-					class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+					class="rounded-full text-[14px] font-semibold px-5 py-2.5 text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+					style="background:var(--color-brand-500); box-shadow:var(--shadow-soft);"
+					onmouseenter={(e) => { if (!(e.currentTarget as HTMLButtonElement).disabled) (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-600)'; }}
+					onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-500)'}
 				>
 					Weiter →
 				</button>
 			{:else}
 				<button
 					type="submit"
-					class="bg-green-600 hover:bg-green-700 text-white text-sm font-semibold px-5 py-2 rounded-md transition-colors"
+					class="rounded-full text-[14px] font-semibold px-6 py-2.5 text-white transition-all"
+					style="background:var(--color-success); box-shadow:var(--shadow-soft);"
+					onmouseenter={(e) => (e.currentTarget as HTMLElement).style.background = '#2ba946'}
+					onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-success)'}
 				>
 					Import bestätigen ✓
 				</button>

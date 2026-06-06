@@ -107,58 +107,60 @@
 	};
 </script>
 
-<div class="space-y-8">
-	<!-- "Kamera erkannt"-Toast -->
+<div class="space-y-10">
+	<!-- Erkennung-Toast -->
 	{#if showCameraToast}
-		<div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 flex items-start justify-between gap-4 shadow-sm">
-			<div class="flex items-center gap-3">
-				<div class="w-9 h-9 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 text-lg shrink-0" aria-hidden="true">
-					<!-- Kamera-SVG -->
+		<div class="rounded-2xl px-5 py-4 flex items-start justify-between gap-4 shadow-[var(--shadow-card)]" style="background:var(--color-brand-50); border:1px solid var(--color-brand-100);">
+			<div class="flex items-start gap-3.5">
+				<div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:var(--color-brand-500); color:#fff;" aria-hidden="true">
 					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-5 h-5">
 						<path d="M3 7a2 2 0 0 1 2-2h2.5l1.2-1.7A2 2 0 0 1 10.4 2.5h3.2c.6 0 1.2.3 1.6.8L16.5 5H19a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
 						<circle cx="12" cy="13" r="3.6"/>
 					</svg>
 				</div>
 				<div class="min-w-0 flex-1">
-					<p class="text-sm font-medium text-blue-900">
+					<p class="text-[15px] font-semibold" style="color:var(--color-brand-900)">
 						{detectedCards.length} {detectedCards.length === 1 ? 'Karte' : 'Karten'} erkannt
 					</p>
 					<ul class="mt-1 space-y-0.5">
 						{#each detectedCards as c}
-							<li class="text-xs text-blue-700">
+							<li class="text-[13px]" style="color:var(--color-brand-700)">
 								<strong>{c.label}</strong>
-								<span class="text-blue-500">· {c.lens}</span>
-								<span class="font-mono text-blue-400">({c.serial})</span>
+								<span style="color:var(--color-brand-500)">· {c.lens}</span>
+								<span class="font-mono text-[11.5px]" style="color:var(--color-brand-400)">({c.serial})</span>
 							</li>
 						{/each}
 					</ul>
 				</div>
 			</div>
-			<div class="flex items-center gap-2 shrink-0">
-				<button type="button" onclick={regenerate} title="Neue Karten simulieren" aria-label="Neu generieren" class="text-blue-500 hover:text-blue-700 p-1.5 rounded-md hover:bg-blue-100 transition-colors">
-					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4">
+			<div class="flex items-center gap-1.5 shrink-0">
+				<button type="button" onclick={regenerate} title="Neue Karten simulieren" aria-label="Neu generieren" class="w-8 h-8 flex items-center justify-center rounded-lg transition-colors" style="color:var(--color-brand-600)" onmouseenter={(e) => (e.currentTarget as HTMLElement).style.background = 'rgba(94,92,230,0.10)'} onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = ''}>
+					<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
 						<polyline points="23 4 23 10 17 10"/>
 						<polyline points="1 20 1 14 7 14"/>
 						<path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
 					</svg>
 				</button>
-				<a href={importLink} class="text-xs font-medium text-white bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-md transition-colors">Alle importieren →</a>
-				<button onclick={() => (showCameraToast = false)} class="text-blue-600 hover:text-blue-800 text-xl leading-none px-1" aria-label="Schliessen">×</button>
+				<a href={importLink} class="text-[13px] font-semibold text-white px-3.5 py-2 rounded-full transition-all" style="background:var(--color-brand-500)" onmouseenter={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-600)'} onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-500)'}>Alle importieren</a>
+				<button onclick={() => (showCameraToast = false)} class="w-8 h-8 flex items-center justify-center rounded-lg text-lg leading-none" style="color:var(--color-brand-600)" onmouseenter={(e) => (e.currentTarget as HTMLElement).style.background = 'rgba(94,92,230,0.10)'} onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = ''} aria-label="Schliessen">×</button>
 			</div>
 		</div>
 	{/if}
 
-	<div class="flex items-center justify-between">
+	<div class="flex items-end justify-between">
 		<div>
-			<h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-			<p class="text-sm text-gray-500 mt-1">Übersicht über Projekte und Importe</p>
+			<h1 class="text-[32px] font-semibold leading-[1.15] tracking-tight" style="color:var(--color-ink-900)">Dashboard</h1>
+			<p class="text-[15px] mt-1.5" style="color:var(--color-ink-500)">Übersicht über deine Projekte und Importe.</p>
 		</div>
 		<div class="flex items-center gap-2">
 			<button
 				onclick={showDetected}
-				title="Kamera-/SD-Karten-Erkennung simulieren"
+				title="Kamera-Erkennung simulieren"
 				aria-label="Kamera-Erkennung simulieren"
-				class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-blue-600 hover:bg-gray-100 rounded-md transition-colors"
+				class="w-10 h-10 flex items-center justify-center rounded-xl transition-all"
+				style="color:var(--color-ink-500); background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);"
+				onmouseenter={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--color-brand-500)'}
+				onmouseleave={(e) => (e.currentTarget as HTMLElement).style.color = 'var(--color-ink-500)'}
 			>
 				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="w-5 h-5">
 					<path d="M3 7a2 2 0 0 1 2-2h2.5l1.2-1.7A2 2 0 0 1 10.4 2.5h3.2c.6 0 1.2.3 1.6.8L16.5 5H19a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -167,9 +169,12 @@
 			</button>
 			<a
 				href="/import"
-				class="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-md transition-colors"
+				class="text-[14px] font-semibold text-white px-5 py-2.5 rounded-full transition-all shadow-[var(--shadow-soft)]"
+				style="background:var(--color-brand-500)"
+				onmouseenter={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-600)'}
+				onmouseleave={(e) => (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-500)'}
 			>
-				+ Import starten
+				Import starten
 			</a>
 		</div>
 	</div>
@@ -182,33 +187,33 @@
 			{ label: 'Dateien', value: data.stats.files },
 			{ label: 'Gesamtgrösse', value: data.stats.totalSizeGb + ' GB' }
 		] as stat}
-			<div class="bg-white rounded-lg border border-gray-200 p-5">
-				<span class="text-xs text-gray-400 uppercase tracking-wide">{stat.label}</span>
-				<p class="text-3xl font-bold text-gray-900 mt-2">{stat.value}</p>
+			<div class="rounded-2xl p-6 transition-all" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
+				<span class="text-[11px] font-semibold uppercase tracking-[0.06em]" style="color:var(--color-ink-400)">{stat.label}</span>
+				<p class="text-[34px] font-semibold mt-2 tracking-tight" style="color:var(--color-ink-900)">{stat.value}</p>
 			</div>
 		{/each}
 	</div>
 
-	<div class="grid grid-cols-2 gap-6">
+	<div class="grid grid-cols-2 gap-5">
 		<!-- Letzte Importe -->
-		<div class="bg-white rounded-lg border border-gray-200">
-			<div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-				<h2 class="font-semibold text-gray-800">Letzte Importe</h2>
-				<a href="/projects" class="text-xs text-blue-600 hover:underline">Alle anzeigen</a>
+		<div class="rounded-2xl overflow-hidden" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
+			<div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--color-stroke)">
+				<h2 class="text-[15px] font-semibold" style="color:var(--color-ink-900)">Letzte Importe</h2>
+				<a href="/projects" class="text-[13px] font-medium" style="color:var(--color-brand-500)">Alle anzeigen</a>
 			</div>
-			<div class="divide-y divide-gray-50">
+			<div>
 				{#if data.recentImports.length === 0}
-					<p class="px-5 py-8 text-sm text-gray-400 text-center">Noch keine Importe vorhanden</p>
+					<p class="px-6 py-10 text-[13px] text-center" style="color:var(--color-ink-400)">Noch keine Importe vorhanden</p>
 				{:else}
-					{#each data.recentImports as imp}
-						<div class="px-5 py-3 flex items-center justify-between">
+					{#each data.recentImports as imp, i}
+						<div class="px-6 py-3.5 flex items-center justify-between" style={i > 0 ? 'border-top:1px solid var(--color-stroke);' : ''}>
 							<div class="min-w-0">
-								<p class="text-sm font-medium text-gray-800 truncate">{imp.project_name ?? '—'}</p>
-								<p class="text-xs text-gray-400">{imp.sd_card_label ?? '—'} · {formatDate(imp.started_at)}</p>
+								<p class="text-[14px] font-medium truncate" style="color:var(--color-ink-900)">{imp.project_name ?? '—'}</p>
+								<p class="text-[12.5px] mt-0.5" style="color:var(--color-ink-400)">{imp.sd_card_label ?? '—'} · {formatDate(imp.started_at)}</p>
 							</div>
 							<div class="flex items-center gap-3 ml-4 shrink-0">
-								<span class="text-xs text-gray-500">{imp.file_count} Dateien</span>
-								<span class="text-xs px-2 py-0.5 rounded-full font-medium {statusColors[imp.status] ?? 'bg-gray-100 text-gray-600'}">
+								<span class="text-[12.5px]" style="color:var(--color-ink-500)">{imp.file_count} Dateien</span>
+								<span class="text-[11px] font-semibold px-2.5 py-1 rounded-full {statusColors[imp.status] ?? ''}" style={imp.status === 'completed' ? 'background:var(--color-success-soft); color:var(--color-success);' : imp.status === 'error' ? 'background:var(--color-danger-soft); color:var(--color-danger);' : imp.status === 'running' ? 'background:var(--color-info-soft); color:var(--color-info);' : 'background:var(--color-warning-soft); color:var(--color-warning);'}>
 									{statusLabels[imp.status] ?? imp.status}
 								</span>
 							</div>
@@ -219,22 +224,22 @@
 		</div>
 
 		<!-- SD-Karten -->
-		<div class="bg-white rounded-lg border border-gray-200">
-			<div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-				<h2 class="font-semibold text-gray-800">SD-Karten</h2>
-				<a href="/sd-cards" class="text-xs text-blue-600 hover:underline">Alle anzeigen</a>
+		<div class="rounded-2xl overflow-hidden" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
+			<div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--color-stroke)">
+				<h2 class="text-[15px] font-semibold" style="color:var(--color-ink-900)">SD-Karten</h2>
+				<a href="/sd-cards" class="text-[13px] font-medium" style="color:var(--color-brand-500)">Alle anzeigen</a>
 			</div>
-			<div class="divide-y divide-gray-50">
+			<div>
 				{#if data.recentSdCards.length === 0}
-					<p class="px-5 py-8 text-sm text-gray-400 text-center">Noch keine SD-Karten erfasst</p>
+					<p class="px-6 py-10 text-[13px] text-center" style="color:var(--color-ink-400)">Noch keine SD-Karten erfasst</p>
 				{:else}
-					{#each data.recentSdCards as card}
-						<div class="px-5 py-3 flex items-center justify-between">
+					{#each data.recentSdCards as card, i}
+						<div class="px-6 py-3.5 flex items-center justify-between" style={i > 0 ? 'border-top:1px solid var(--color-stroke);' : ''}>
 							<div>
-								<p class="text-sm font-medium text-gray-800">{card.label}</p>
-								<p class="text-xs text-gray-400">{card.serial ?? 'Keine Seriennummer'} · {formatDate(card.created_at)}</p>
+								<p class="text-[14px] font-medium" style="color:var(--color-ink-900)">{card.label}</p>
+								<p class="text-[12.5px] mt-0.5" style="color:var(--color-ink-400)"><span class="font-mono">{card.serial ?? 'Keine Seriennummer'}</span> · {formatDate(card.created_at)}</p>
 							</div>
-							<a href="/sd-cards" class="text-xs text-blue-600 hover:underline">Details</a>
+							<a href="/sd-cards" class="text-[13px] font-medium" style="color:var(--color-brand-500)">Details</a>
 						</div>
 					{/each}
 				{/if}
@@ -243,26 +248,26 @@
 	</div>
 
 	<!-- Letzte Projekte -->
-	<div class="bg-white rounded-lg border border-gray-200">
-		<div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-			<h2 class="font-semibold text-gray-800">Letzte Projekte</h2>
-			<a href="/projects" class="text-xs text-blue-600 hover:underline">Alle anzeigen</a>
+	<div class="rounded-2xl overflow-hidden" style="background:var(--color-surface); border:1px solid var(--color-stroke); box-shadow:var(--shadow-soft);">
+		<div class="px-6 py-4 flex items-center justify-between" style="border-bottom:1px solid var(--color-stroke)">
+			<h2 class="text-[15px] font-semibold" style="color:var(--color-ink-900)">Letzte Projekte</h2>
+			<a href="/projects" class="text-[13px] font-medium" style="color:var(--color-brand-500)">Alle anzeigen</a>
 		</div>
-		<div class="divide-y divide-gray-50">
+		<div>
 			{#if data.recentProjects.length === 0}
-				<p class="px-5 py-8 text-sm text-gray-400 text-center">Noch keine Projekte vorhanden</p>
+				<p class="px-6 py-10 text-[13px] text-center" style="color:var(--color-ink-400)">Noch keine Projekte vorhanden</p>
 			{:else}
-				{#each data.recentProjects as project}
-					<div class="px-5 py-3 flex items-center justify-between">
-						<div>
-							<p class="text-sm font-medium text-gray-800">{project.name}</p>
+				{#each data.recentProjects as project, i}
+					<div class="px-6 py-3.5 flex items-center justify-between" style={i > 0 ? 'border-top:1px solid var(--color-stroke);' : ''}>
+						<div class="min-w-0">
+							<p class="text-[14px] font-medium" style="color:var(--color-ink-900)">{project.name}</p>
 							{#if project.notes}
-								<p class="text-xs text-gray-400 truncate max-w-md">{project.notes}</p>
+								<p class="text-[12.5px] mt-0.5 truncate max-w-md" style="color:var(--color-ink-400)">{project.notes}</p>
 							{/if}
 						</div>
-						<div class="flex items-center gap-4">
-							<span class="text-xs text-gray-400">{formatDate(project.created_at)}</span>
-							<a href="/projects/{project.id}" class="text-xs text-blue-600 hover:underline">Öffnen</a>
+						<div class="flex items-center gap-4 shrink-0 ml-4">
+							<span class="text-[12.5px]" style="color:var(--color-ink-400)">{formatDate(project.created_at)}</span>
+							<a href="/projects/{project.id}" class="text-[13px] font-medium" style="color:var(--color-brand-500)">Öffnen →</a>
 						</div>
 					</div>
 				{/each}
