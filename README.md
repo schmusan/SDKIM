@@ -21,183 +21,184 @@
 
 ## 1. Ausgangslage
 
-Bei Foto- und Videoprojekten entstehen grosse Mengen an Mediendaten von verschiedenen SD-Karten, oft von unterschiedlichen Kameras und Objektiven. Beim manuellen Import fehlt die Struktur, Kopierfehler bleiben unbemerkt und im Nachhinein lässt sich kaum nachvollziehen, von welcher Karte eine Datei stammt.
+Bei Foto- und Videoprojekten kommen oft viele SD-Karten von verschiedenen Kameras zusammen. Beim manuellen Importieren verliert man schnell den Überblick. Es gibt keine Struktur, doppelte Dateien fallen nicht auf und im Nachhinein weiss man oft nicht mehr, welche Datei von welcher Karte stammt.
 
-- **Problem:** Chaotische, fehleranfällige und schlecht nachvollziehbare Import-Workflows bei Mediendaten.
-- **Ziele:** Geführter Importprozess · strukturierte Ablage nach Projekt/Kamera/Objektiv · Quellen­nachverfolgung · Fehler-/Duplikatserkennung.
-- **Primäre Zielgruppe:** Videograf:innen, Fotograf:innen und Content Creator mit mehreren Kameras/SD-Karten pro Shoot.
-- **Weitere Stakeholder:** Post-Production-Teams und Agenturen, die auf konsistente Ordnerstrukturen angewiesen sind.
+- **Problem:** Unübersichtlicher Import von Mediendaten mit mehreren SD-Karten.
+- **Ziele:** Klare Schritte beim Import, automatische Ordnerstruktur, Datei-Herkunft nachvollziehbar, weniger Fehler.
+- **Zielgruppe:** Videograf:innen, Fotograf:innen und Content Creator, die mit mehreren Kameras arbeiten.
+- **Weitere Stakeholder:** Post-Production-Teams und Agenturen.
 
 ## 2. Lösungsidee
 
-**SDKIM** verwaltet SD-Karten-Importe zentral über einen geführten 3-Schritt-Wizard. Karten werden als „erkannt" simuliert, der Nutzer wählt aus, ordnet sie einem Projekt zu, bestätigt — alles weitere (Kameraprofil-Anlage, Dateibenennung nach Hersteller-Konvention, Logs) passiert automatisch.
+**SDKIM** ist eine Web-App, die den Import von SD-Karten verwaltet. Der Nutzer wird durch einen Wizard geführt, vom Erkennen der Karte bis zur fertigen Ablage im Projekt.
 
-- **Kernfunktionalität:**
-  - Dashboard mit Live-Erkennungs-Toast (1–5 zufällige Karten + Objektive aus 50 Full-Frame-Modellen)
-  - Import-Wizard: SD-Karten → Projekt & Optionen → Übersicht
-  - Projektverwaltung mit Live-Suche und Filtern nach Kamera/Objektiv
-  - SD-Karten-Verwaltung mit Importhistorie pro Karte
-  - Kameras mit aufklappbarer Import-Historie pro Modell und Objektiv-Tracking
-  - Statistiken (Chart.js): Speicher pro Projekt, Dateien pro Kamera, Import-Verlauf
-- **Annahmen:** Desktop-zentrierte Nutzung (1440 px), Profis erwarten geführte Workflows und klare Statusmeldungen.
-- **Abgrenzung:** Kein echter Hardware-Zugriff auf SD-Karten (Browser-Sandbox). Importe werden funktional simuliert, das Datenmodell und der UI-Flow sind aber vollständig.
+- **Kernfunktionen:**
+  - Dashboard mit Übersicht und einer Simulation, die erkannte Karten anzeigt.
+  - Import-Wizard in 3 Schritten: SD-Karten wählen → Projekt & Optionen → Übersicht.
+  - Projektübersicht mit Suche und Filtern nach Kamera oder Objektiv.
+  - SD-Karten-Verwaltung mit Importhistorie pro Karte.
+  - Kameras-Seite mit allen Importen pro Modell.
+  - Statistiken mit Charts (Speicher, Dateien, Importverlauf).
+- **Annahmen:** Die App wird am Computer benutzt. Profis erwarten geführte Workflows.
+- **Was nicht zum Umfang gehört:** Echter Zugriff auf die physische SD-Karte. Der Import wird im Browser simuliert, das Datenmodell und die UI sind aber vollständig.
 
 ## 3. Vorgehen & Artefakte
 
 ### 3.1 Understand & Define
 
-- **Problemraum:** Aus eigener Berufserfahrung als Videograf (Agentur scont GmbH) abgeleitet — typische Pain Points: Chaos beim Import, doppelte Dateien, manuelle Umbenennung, unklare Quelle.
-- **Proto-Persona:** „Sandro", 28, Videograf — 3–5 SD-Karten pro Auftrag, zwei Kamerasysteme. Will in unter einer Minute sehen, ob alle Aufnahmen vollständig importiert wurden.
-- **Wesentliche Erkenntnisse:** Wizard statt Formular · Quellenzuordnung ist genauso wichtig wie der Kopiervorgang · Fehler müssen sichtbar gemacht werden.
-- **How Might We:** *Wie könnten wir den Import so gestalten, dass Dateien automatisch nach Kamera/Objektiv organisiert, Projekten zugeordnet und Fehler erkannt werden?*
+Den Problemraum kenne ich aus eigener Erfahrung als Videograf. Typische Pain Points: Chaos beim Import, doppelte Dateien, manuelles Umbenennen, unklare Herkunft.
+
+- **Proto-Persona:** „Sandro", 28, Videograf in einer Agentur. Pro Auftrag 3–5 SD-Karten von zwei Kamerasystemen. Will schnell sehen, ob alles importiert ist.
+- **Erkenntnisse:** Wizard statt langes Formular. Die Quelle einer Datei ist genauso wichtig wie der Inhalt. Fehler müssen sichtbar werden.
+- **How Might We:** *Wie können wir SD-Karten so importieren, dass Dateien automatisch Kameras und Projekten zugeordnet werden und Fehler auffallen?*
 
 ### 3.2 Sketch
 
-Drei Lösungsvarianten gegeneinander abgewogen:
+Ich habe drei Varianten skizziert:
 
 | Variante | Stärken | Schwächen |
 |---|---|---|
-| **A — Single-Page-Wizard** | minimal | skaliert schlecht |
-| **B — Sidebar-App mit Wizard** ✅ | vertrautes Muster (Lightroom/Capture One), erweiterbar | etwas mehr Aufwand |
-| **C — Drag-&-Drop-Board** | visuell stark | weniger geführt, fehleranfällig |
+| **A — Single-Page-Wizard** | minimal | skaliert schlecht bei mehreren Karten |
+| **B — Sidebar-App mit Wizard** ✅ | bekannt aus Lightroom/Capture One, gut erweiterbar | etwas mehr Aufwand |
+| **C — Drag-&-Drop-Board** | visuell stark | weniger geführt, fehleranfälliger |
 
 ### 3.3 Decide
 
-- **Variante B** gewählt: Sidebar-App mit geführtem Wizard.
-- **End-to-End-Ablauf:** Dashboard → Toast erkennt Karten → Wizard (SD-Karten → Projekt & Optionen → Übersicht) → Fortschritt → Bestätigung → Projekt-Detailansicht.
+- **Gewählt: Variante B**, weil Profis das Sidebar-Layout aus DAM-Software kennen und der Wizard den Workflow klar führt.
+- **Ablauf:** Dashboard → Toast erkennt Karten → Wizard → Fortschrittsanzeige → Bestätigung → Projektdetail.
 - **Mockup:** [Figma-Prototyp aus Übung 10](https://www.figma.com/proto/SWRKnCMjB0A3eLJZcAVIX8/Übung-10?node-id=10226-1443&t=mu2bnp1OgrTDd3zu-1)
 
 ### 3.4 Prototype
 
 #### 3.4.1 Entwurf (Design)
 
-- **Informationsarchitektur:** Persistente Sidebar mit 7 Bereichen (Dashboard, Import, Projekte, SD-Karten, Kameras, Statistiken, Einstellungen). Import ist ein 3-Schritt-Wizard.
+- **Informationsarchitektur:** Sidebar mit 7 Bereichen (Dashboard, Import, Projekte, SD-Karten, Kameras, Statistiken, Einstellungen). Der Import ist ein 3-Schritt-Wizard.
 - **Wichtige Screens:**
-  - **Dashboard** — Stat-Cards, Live-Erkennungs-Toast, letzte Importe/Karten/Projekte
-  - **Import-Wizard** — visueller Step-Indicator, frisch erkannte Karten als Tiles, manueller Fallback mit Finder-Picker als prominenter Drop-Zone
-  - **Projektübersicht** — Live-Suche + Filter nach Kamera/Objektiv
-  - **Projekt-Detail** — Dateien mit EXIF-Daten, Filter, Importhistorie
-  - **Kameras** — pro Kameramodell aufklappbare Import-Historie inkl. Objektivliste
+  - **Dashboard** mit Stat-Cards und Toast für die Karten-Erkennung
+  - **Import-Wizard** mit Step-Indicator und Karten als Tiles
+  - **Projektübersicht** mit Suche und Filter
+  - **Projekt-Detail** mit Dateien, EXIF-Daten und Importhistorie
+  - **Kameras** mit aufklappbarer Import-Liste pro Modell
 - **Designentscheidungen:**
-  - **Desktop-First (1440 px)** — Zielgruppe arbeitet am Computer
-  - **Sidebar-Navigation** — bekannt aus DAM-Software
-  - **Wizard-zentrierte Hierarchie** — der Importvorgang ist visueller Anker
-  - **Apple-orientiertes Designsystem** (Brand-Indigo `#5E5CE6`, Inter Font, soft Shadows, Squircle-Logo) — siehe `BRANDBOOK.md`
+  - **Desktop-First (1440 px)** weil die Zielgruppe am Computer arbeitet
+  - **Sidebar-Navigation** weil das aus anderen Apps vertraut ist
+  - **Wizard** weil der Import der zentrale Workflow ist
+  - **Eigenes Designsystem** mit Indigo-Brand, Inter-Font und weichen Schatten (Details siehe `BRANDBOOK.md`)
 
 #### 3.4.2 Umsetzung (Technik)
 
-- **Stack:** SvelteKit 2 + Svelte 5 (Runes) + TypeScript · Tailwind CSS 4 mit Design-Tokens via `@theme` · MongoDB Atlas · Chart.js 4 · Netlify-Adapter
-- **Struktur:** `src/routes/` 11 Routes, `src/lib/server/db/` (zentrale DB-Anbindung + 8 Collections), `src/lib/components/Tooltip.svelte`, `src/lib/camera-data.ts` (Hersteller-Datei-Konventionen + 50 Full-Frame-Modelle)
-- **Daten:** Collections `projects`, `sd_cards`, `cameras`, `imports`, `files`, `import_logs`, `app_settings`, `import_templates`. Mutations laufen über SvelteKit Form Actions, Aggregations direkt in MongoDB.
+- **Stack:** SvelteKit 2 + Svelte 5 (Runes) mit TypeScript, Tailwind CSS 4, MongoDB Atlas, Chart.js 4, Netlify-Adapter.
+- **Struktur:** Routes liegen unter `src/routes/`. Die DB-Anbindung steckt in `src/lib/server/db/`. Hilfsdaten zu Kameras und Hersteller-Dateinamen in `src/lib/camera-data.ts`.
+- **Daten & Schnittstellen:** 8 MongoDB-Collections (`projects`, `sd_cards`, `cameras`, `imports`, `files`, `import_logs`, `app_settings`, `import_templates`). Alle Mutationen laufen über SvelteKit Form Actions, Aggregations direkt in MongoDB.
 - **Deployment:** [https://sdkim.netlify.app](https://sdkim.netlify.app)
 - **Besondere Entscheidungen:**
-  - **MongoDB statt SQLite** — sauberes Netlify-Deployment ohne lokales File, dokumenten-orientierte Modelle
-  - **Importe funktional simuliert** mit echten Hersteller-Dateinamen (`DSC0xxxx.ARW`, `IMG_xxxx.CR3`, `Z 50mm` Pfaden) und realistischen Dateigrössen
-  - **Form Actions statt API-Endpoints** — SvelteKit-idiomatisch, weniger Boilerplate
+  - Wechsel von SQLite zu MongoDB Atlas, weil das Deployment auf Netlify damit einfacher ist.
+  - Die Imports sind simuliert, aber die Dateinamen folgen den echten Konventionen der Hersteller (Sony `DSC0…ARW`, Canon `IMG_…CR3`, Nikon `DSC_…NEF`, usw.).
+  - Form Actions statt eigener API-Endpoints, weil das in SvelteKit weniger Boilerplate ist.
 
 ### 3.5 Validate
 
-- **URL der getesteten Version:** [https://sdkim.netlify.app](https://sdkim.netlify.app) (V1.0)
-- **Ziele:** Ist der Import-Workflow selbsterklärend? Reicht das Feedback? Decken die Funktionen die echten Arbeitsabläufe ab?
-- **Vorgehen:** Moderierter On-Site-Test mit dem Feedback-Grid (4 Quadranten).
-- **Stichprobe:** 2 Testpersonen (Foto-/Videografie-Affinität), 20.05.2026 — **Basil Härri** und **Aladin Kaermo**.
-- **Aufgaben:** Karte importieren · neues Projekt anlegen · Dateien nach Kamera einsehen · Importhistorie prüfen.
+- **Getestete Version:** [https://sdkim.netlify.app](https://sdkim.netlify.app) (V1.0)
+- **Ziele:** Ist der Import-Workflow verständlich? Gibt es genug Feedback? Decken die Funktionen die echten Abläufe ab?
+- **Vorgehen:** Moderierter Test mit dem Feedback-Grid (4 Quadranten).
+- **Stichprobe:** 2 Testpersonen aus dem Foto-/Video-Bereich, am 20.05.2026 — **Basil Härri** und **Aladin Kaermo**.
+- **Aufgaben:** Karte importieren, Projekt anlegen, Dateien nach Kamera anschauen, Importhistorie prüfen.
 - **Beobachtungen:**
 
 | Kategorie | Findings |
 |---|---|
-| Positiv | Import-Workflow lief erfolgreich durch · App „übersichtlich" und „selbsterklärend" · Statistiken „praktisch" |
-| Negativ / fehlend | Keine Erfolgsmeldung · Kamera-Zuordnung unzuverlässig · Filter fehlten · Dateiumbenennung uneinheitlich · Sinn der Seriennummer unklar · Objektiv nicht ergänzbar |
+| Positiv | Import läuft durch · App wirkt „übersichtlich" und „selbsterklärend" · Statistiken werden gelobt |
+| Negativ / fehlend | Keine Erfolgsmeldung · Kamera-Zuordnung unzuverlässig · Filter fehlen · Sinn der Seriennummer unklar |
 | Ideen | Filter nach Kamera/Objektiv · Projekt-Vorauswahl beim Import · Suchleiste |
-| Unklar | Bedeutung von Import-Vorlagen und Seriennummer |
+| Unklar | Was machen Import-Vorlagen genau? |
 
-- **Zusammenfassung:** Kern-Workflow verstanden, visuell stimmig. Defizite vor allem bei Feedback-nach-Abschluss, fehlenden Filtern und Verständnislücken bei Sekundärfunktionen.
-- **Abgeleitete Verbesserungen (priorisiert, alle umgesetzt):**
-  1. ✅ Erfolgs-Banner nach Import (Toast via `?imported=1`)
-  2. ✅ Filter im Projekt-Detail (Kamera/Objektiv)
-  3. ✅ Volltext-Suche über Dateinamen
+- **Zusammenfassung:** Der Kern-Workflow wurde verstanden, die Optik gefällt. Die Defizite betreffen vor allem fehlendes Feedback nach dem Import und fehlende Filter.
+- **Abgeleitete Verbesserungen (alle umgesetzt):**
+  1. ✅ Erfolgs-Banner nach dem Import
+  2. ✅ Filter im Projekt-Detail nach Kamera und Objektiv
+  3. ✅ Volltext-Suche über die Dateinamen
   4. ✅ Tooltips für Seriennummer und Vorlagen
-  5. ✅ Projekt-Vorauswahl beim Import-Start
-  6. ✅ Objektivfeld manuell ergänzbar
+  5. ✅ Projekt wird beim Import-Start vorausgewählt
+  6. ✅ Objektiv kann manuell ergänzt werden
 
 ## 4. Erweiterungen
 
-### 4.1 Multi-SD-Karten Import
-Mehrere Karten in einem Wizard-Durchlauf importierbar (typisch 2–5 pro Shoot). **Wo:** Multi-Tile-Auswahl in `import/+page.svelte`, Server iteriert über `sd_card_ids[]`. **Issue:** [#9](https://github.com/schmusan/SDKIM/issues/9)
+### 4.1 Mehrere SD-Karten gleichzeitig importieren
+Statt einer Karte pro Import können mehrere parallel gewählt werden — bei Shoots mit zwei Kamerabodies oder mehreren Karten der Standardfall. **Wo:** Tile-Auswahl im Wizard, Server iteriert über alle gewählten Karten. **Issue:** [#65](https://github.com/schmusan/SDKIM/issues/65)
 
-### 4.2 Kameraprofile mit Auto-Anlage und Objektiv-Tracking
-Jede Kamera wird bei erstem Import automatisch als Profil angelegt; bei jedem weiteren Import wird das verwendete Objektiv in die `lenses[]`-Liste der Kamera gemergt. **Wo:** `upsertCameraProfiles()` in `import/+page.server.ts`, Anzeige in `cameras/+page.svelte`. **Issue:** [#6](https://github.com/schmusan/SDKIM/issues/6)
+### 4.2 Kameras werden automatisch angelegt
+Nach jedem Import wird das verwendete Kameramodell als Profil gespeichert. Wenn das Modell schon existiert, wird das benutzte Objektiv zur Liste hinzugefügt. So baut sich mit der Zeit eine vollständige Übersicht auf. **Issue:** [#62](https://github.com/schmusan/SDKIM/issues/62)
 
-### 4.3 Duplikaterkennung & Checksummen-Verifizierung
-Optionale Erkennung doppelter Dateien und Checksummen-Verifizierung. **Issues:** [#7](https://github.com/schmusan/SDKIM/issues/7), [#8](https://github.com/schmusan/SDKIM/issues/8)
+### 4.3 Duplikate erkennen und Checksumme prüfen
+Optional kann der Import doppelte Dateien überspringen und nach dem Kopieren mit einer Checksumme verifizieren. **Issues:** [#63](https://github.com/schmusan/SDKIM/issues/63), [#64](https://github.com/schmusan/SDKIM/issues/64)
 
-### 4.4 EXIF-Metadaten je Datei
-ISO, Verschlusszeit, Brennweite und Kameramodell pro Datei. **Issue:** [#3](https://github.com/schmusan/SDKIM/issues/3)
+### 4.4 EXIF-Metadaten pro Datei
+Jede Datei zeigt ISO, Verschlusszeit, Brennweite und Kameramodell. **Issue:** [#59](https://github.com/schmusan/SDKIM/issues/59)
 
-### 4.5 Statistiken mit Chart.js
-Drei Visualisierungen über alle Projekte hinweg via MongoDB-Aggregations. **Issue:** [#14](https://github.com/schmusan/SDKIM/issues/14)
+### 4.5 Statistiken mit Charts
+Drei Diagramme (Speicher pro Projekt, Dateien pro Kamera, Importverlauf) auf einer eigenen Seite. **Issue:** [#70](https://github.com/schmusan/SDKIM/issues/70)
 
 ### 4.6 Import-Vorlagen
-Wiederverwendbare Konfigurations-Sets. **Issue:** [#11](https://github.com/schmusan/SDKIM/issues/11)
+Häufig genutzte Optionen lassen sich als Vorlage speichern und beim nächsten Import wiederverwenden. **Issue:** [#67](https://github.com/schmusan/SDKIM/issues/67)
 
-### 4.7 Filter auf Projektübersicht (Kamera & Objektiv)
-Server-seitige Aggregation `files → imports → projects` reduziert die Projektliste auf solche mit passenden EXIF-Daten. **Wo:** `projects/+page.server.ts`
+### 4.7 Filter auf der Projektübersicht
+Zusätzlich zur Namens-Suche kann nach Kamera und Objektiv gefiltert werden. Im Hintergrund läuft eine Aggregation über die EXIF-Daten der importierten Dateien.
 
-### 4.8 Live-Suche ohne Submit-Button
-Tippen filtert nach 400 ms automatisch; SvelteKit `goto({keepFocus, noScroll})` behält Cursor und Scroll-Position. **Wo:** `projects/+page.svelte`
+### 4.8 Live-Suche ohne Klick
+Während des Tippens wird die Liste nach 400 ms aktualisiert. Cursor und Scrollposition bleiben dabei erhalten.
 
-### 4.9 Dashboard-Erkennungs-Toast
-1–5 zufällige Karten aus 50 echten Full-Frame-Kameras + zufälliges Objektiv pro Karte. Auto-Auslöser nach 5 s (session-once), Daten werden via URL-Parameter an den Import übergeben.
+### 4.9 Erkennungs-Toast im Dashboard
+Eine Simulation zeigt 1–5 zufällige SD-Karten mit echten Full-Frame-Kameramodellen und passenden Objektiven. Mit einem Klick auf „Alle importieren" werden die Daten an den Import-Wizard übergeben.
 
 ### 4.10 Echte Hersteller-Dateinamen
-Pro Marke korrekte Konvention (Sony `DSC0xxxx.ARW` / `Cxxxx.MP4`, Canon `IMG_xxxx.CR3`, Nikon `DSC_xxxx.NEF`, Leica `L101xxxx.DNG`, Hasselblad `B000xxxx.3FR` usw.) und realistische Dateigrössen. **Wo:** `lib/camera-data.ts`
+Die simulierten Dateien folgen den echten Namenskonventionen (Sony `DSC0…ARW` / `C…MP4`, Canon `IMG_…CR3`, Nikon `DSC_…NEF`, Leica `L101…DNG`, Hasselblad `B000…3FR`). Auch die Dateigrössen sind realistisch.
 
-### 4.11 Aus Evaluation umgesetzte Verbesserungen
-Alle 6 Verbesserungen aus der Usability-Evaluation (siehe Kap. 3.5) wurden noch während der Projektlaufzeit umgesetzt — Success-Banner, Filter, Volltext-Suche, Tooltips, Projekt-Vorauswahl, Objektivfeld.
+### 4.11 Aus der Evaluation übernommen
+Alle 6 Verbesserungen aus der Evaluation (siehe Kap. 3.5) wurden noch während der Projektlaufzeit umgesetzt.
 
-### 4.12 Eigenes Designsystem & Brandbook
-Apple-orientiertes Designsystem mit Brand-Indigo `#5E5CE6`, Inter Variable Font, soft Shadows und Squircle-Logo. Tokens via Tailwind v4 `@theme`. **Wo:** `BRANDBOOK.md`, `static/logo.svg`, `src/routes/layout.css`
+### 4.12 Eigenes Designsystem
+Ein eigenes Designsystem mit Indigo-Markenfarbe, Inter-Font, weichen Schatten und einem Squircle-Logo. Die Details stehen in `BRANDBOOK.md`. Tokens sind über Tailwind v4 `@theme` definiert.
 
-### 4.13 Anwendung formaler Use-Case-Methodik
-10 strukturierte Use Cases (UC-1 … UC-10) als GitHub Issues mit Label `use-case` — Akteur, Vorbedingung, Hauptablauf, Erweiterungen. **Link:** [Use-Case-Issues](https://github.com/schmusan/SDKIM/issues?q=label%3Ause-case)
+### 4.13 Use Cases als zusätzliches Artefakt
+10 Use Cases (UC-1 bis UC-10) aus dem Modul Requirements Engineering, als GitHub Issues mit Label `use-case` dokumentiert. **Link:** [Use-Case-Issues](https://github.com/schmusan/SDKIM/issues?q=label%3Ause-case)
 
 ## 5. Projektorganisation
 
 - **Repository:** [github.com/schmusan/SDKIM](https://github.com/schmusan/SDKIM) (public)
-- **Issue-Management:** Pro Feature und pro Use Case ein eigenes Issue, geschlossen via `closes #N` aus den Commits
-- **Commit-Praxis:** Sprechende Messages mit konsistentem Schema (`Add …`, `Fix …`, `Migrate …`)
-- **Branching:** `main`-only (Einzelprojekt)
+- **Issues:** Pro Feature und pro Use Case ein Issue. Beim Commit wird mit `closes #N` referenziert.
+- **Commits:** Sprechende Messages, ein Schritt pro Commit (`Add …`, `Fix …`, `Migrate …`).
+- **Branching:** Nur `main`, weil ich allein arbeite.
 
 ## 6. KI-Deklaration
 
 ### 6.1 KI-Tools
 
-- **Eingesetzte Tools:** KI-gestützte Code-Assistenz (Chat-/Agent-basierter Assistent) für punktuelle Unterstützung bei klar abgegrenzten Aufgaben.
-- **Eigene Grundleistung:** Die **Grundfunktionen sämtlicher Seiten** habe ich selbst aufgesetzt — SvelteKit-Initialisierung, Routes, Layouts, MongoDB-Anbindung, Basis-Importworkflow. Auch Problemraum, Zielgruppe, Lösungsidee und Figma-Mockup sind eigenständig erarbeitet.
-- **KI-unterstützte Bereiche (vier konkrete Erweiterungen):**
-  1. **Import-Workflow** — Refactor des linearen Formulars zum 3-Schritt-Wizard inkl. Mehrfach-SD-Karten
-  2. **Projekt-Filter** — Server-seitige Aggregation `files → imports → projects` und Live-Suche
-  3. **SD-Karten-Verwaltung** — Erkennungs-Simulation auf dem Dashboard mit URL-Übergabe und Importhistorie pro Karte
-  4. **Kameras** — Auto-Anlage / Aktualisierung von Profilen inkl. Objektiv-Tracking, aufklappbare Import-Historie
-- **Final-Phase:** Gegen Projektende habe ich KI für zwei abschliessende Themen eingesetzt:
-  - **Designsystem & Brandbook** — Markenfarbe, Logo, Token-System, visueller Refactor
-  - **Statistiken** — Chart.js-Konfiguration und MongoDB-Aggregations
-- **Final-Review:** Sämtlicher Code im Editor durchgesehen, lokal getestet, auf eigene Konventionen angepasst. `.env` gitignored, keine Credentials im Repo, keine fremden Assets ohne offene Lizenz.
+- **Eingesetzte Tools:** Ein KI-gestützter Code-Assistent als Hilfe bei einzelnen Aufgaben.
+- **Was ich selbst gemacht habe:** Die Grundfunktionen aller Seiten habe ich selbst aufgesetzt — von der SvelteKit-Initialisierung über die ersten Routes und Layouts bis zur MongoDB-Anbindung und dem Basis-Importworkflow. Auch Problemraum, Zielgruppe, Lösungsidee und Figma-Mockup habe ich selbst erarbeitet.
+- **Wo ich KI-Hilfe genutzt habe:** Bei vier konkreten Erweiterungen — jeweils nach eigenem Konzept und mit eigener Integration:
+  1. **Import-Workflow** — Umbau zum 3-Schritt-Wizard mit Unterstützung für mehrere SD-Karten.
+  2. **Projektfilter** — Server-Aggregation für die Filter nach Kamera/Objektiv und die Live-Suche.
+  3. **SD-Karten-Verwaltung** — Erkennungs-Simulation im Dashboard und Importhistorie pro Karte.
+  4. **Kameras** — Automatische Anlage von Kameraprofilen und die Import-Historie pro Modell.
+- **Am Schluss:** Gegen Ende habe ich KI für zwei letzte Themen genutzt — das Designsystem (Markenfarbe, Logo, Tokens, visueller Refactor) und die Statistiken (Chart.js-Aggregationen).
+- **Was ich selbst geprüft habe:** Den ganzen Code im Editor durchgesehen, lokal getestet, an meine Konventionen angepasst. `.env` ist gitignored, keine Credentials im Repo, keine fremden Assets ohne offene Lizenz.
 
 ### 6.2 Prompt-Vorgehen
 
-Pro Erweiterung ein klar umrissener Auftrag, kein „bau die ganze App"-Prompt. Ablauf: **Kontext geben → Abgrenzen → Review → Iterieren**. Beispiel: *„Ergänze die Projektübersicht um zwei Filter (Kamera und Objektiv). Die Werte sollen aus den `files`-Dokumenten kommen, gefiltert über die zugehörigen Imports → Projekte. UI: zwei Dropdowns neben dem Suchfeld."*
+Ich habe pro Erweiterung einen klaren Auftrag formuliert, keine globalen „bau die ganze App"-Prompts. Der Ablauf war immer ähnlich: zuerst den Kontext geben, dann genau abgrenzen, was geändert werden soll, danach den Vorschlag im Editor prüfen, lokal testen und committen. Wenn etwas nicht zur Codebasis passte, habe ich gezielt nachgefragt.
+
+Beispiel: *„Ergänze die Projektübersicht um zwei Filter (Kamera und Objektiv). Die Werte sollen aus den `files`-Dokumenten kommen, gefiltert über die zugehörigen Imports → Projekte. UI: zwei Dropdowns neben dem Suchfeld."*
 
 ### 6.3 Reflexion
 
-- **Nutzen:** Geschwindigkeitsgewinn bei mechanischen Aufgaben (Aggregations-Queries, UI-Refactorings, repetitivem Markup).
-- **Grenzen:** Konzeptionelle Entscheidungen (Wizard-Aufteilung, Datenmodell, Reaktion auf Evaluation-Feedback) blieben in meiner Hand. KI hat keine eigene Position, sie schlägt das Naheliegende vor.
-- **Qualitätssicherung:** Jeder generierte Code wurde gegen die offizielle Doku abgeglichen und im Browser end-to-end getestet.
-- **Verantwortung:** Inhaltliche und rechtliche Verantwortung liegt vollständig bei mir.
+- **Nutzen:** Bei mechanischen Aufgaben (Aggregations-Queries, UI-Refactorings, viel ähnlicher Code) war KI deutlich schneller als ich.
+- **Grenzen:** Wichtige Entscheidungen wie die Wizard-Aufteilung, das Datenmodell oder die Reaktion auf das User-Feedback musste ich selbst treffen. KI schlägt das Naheliegende vor, hat aber keine eigene Meinung.
+- **Qualitätssicherung:** Jeden generierten Code habe ich gegen die offizielle Doku geprüft und im Browser durchgetestet.
+- **Verantwortung:** Die inhaltliche und rechtliche Verantwortung liegt vollständig bei mir.
 
 ## 7. Anhang
 
-- **Quellen & Lizenzen:** SvelteKit, Svelte, Tailwind, Chart.js (MIT) · MongoDB Node Driver (Apache 2.0) · Inter Variable Font (OFL)
+- **Lizenzen:** SvelteKit, Svelte, Tailwind, Chart.js (MIT) · MongoDB Node Driver (Apache 2.0) · Inter Variable Font (OFL)
 - **Use Cases:** [Use-Case-Issues](https://github.com/schmusan/SDKIM/issues?q=label%3Ause-case)
 - **Designsystem:** `BRANDBOOK.md`
 - **Rohdaten Evaluation:** `Usability Evaluation_Basil Härri.pdf`, Feedback Aladin Kaermo (V1.0, 20.05.2026)
