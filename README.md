@@ -173,15 +173,26 @@ Ein eigenes Designsystem mit Indigo-Markenfarbe, Inter-Font, weichen Schatten un
 
 ### 6.1 KI-Tools
 
-- **Eingesetzte Tools:** Ein KI-gestützter Code-Assistent als Hilfe bei einzelnen Aufgaben.
-- **Was ich selbst gemacht habe:** Die Grundfunktionen aller Seiten habe ich selbst aufgesetzt — von der SvelteKit-Initialisierung über die ersten Routes und Layouts bis zur MongoDB-Anbindung und dem Basis-Importworkflow. Auch Problemraum, Zielgruppe, Lösungsidee und Figma-Mockup habe ich selbst erarbeitet.
-- **Wo ich KI-Hilfe genutzt habe:** Bei vier konkreten Erweiterungen — jeweils nach eigenem Konzept und mit eigener Integration:
-  1. **Import-Workflow** — Umbau zum 3-Schritt-Wizard mit Unterstützung für mehrere SD-Karten.
-  2. **Projektfilter** — Server-Aggregation für die Filter nach Kamera/Objektiv und die Live-Suche.
-  3. **SD-Karten-Verwaltung** — Erkennungs-Simulation im Dashboard und Importhistorie pro Karte.
-  4. **Kameras** — Automatische Anlage von Kameraprofilen und die Import-Historie pro Modell.
-- **Am Schluss:** Gegen Ende habe ich KI für zwei letzte Themen genutzt — das Designsystem (Markenfarbe, Logo, Tokens, visueller Refactor) und die Statistiken (Chart.js-Aggregationen).
-- **Was ich selbst geprüft habe:** Den ganzen Code im Editor durchgesehen, lokal getestet, an meine Konventionen angepasst. `.env` ist gitignored, keine Credentials im Repo, keine fremden Assets ohne offene Lizenz.
+**Eingesetztes Tool:** Code — ein KI-Assistent in Visual Studio Code. Ich habe ihn punktuell für einzelne, klar abgegrenzte Aufgaben genutzt.
+
+**Was ich selbst gemacht habe (Grundlagen):**
+- Konzept und Vorgehen: Problem, Zielgruppe, Lösungsidee, Figma-Mockup
+- Projekt-Setup: SvelteKit, TypeScript, Tailwind, Netlify-Adapter
+- Grundgerüst aller Seiten: Routes, Layouts, Sidebar-Navigation
+- Datenmodell und MongoDB-Anbindung
+- Ein erstes lauffähiges Import-Formular und einfache Übersichts-Seiten (Dashboard, Projekte, SD-Karten, Kameras, Einstellungen)
+- CRUD-Form-Actions (Anlegen, Bearbeiten, Löschen)
+
+**Wo ich Code (KI) für die Erweiterungen genutzt habe:**
+- **Import-Workflow:** Umbau vom langen Formular zum 3-Schritt-Wizard, Unterstützung für mehrere SD-Karten gleichzeitig, Tile-Auswahl mit Aktiv-Status, Step-Indicator, Übergabe von Daten per URL-Parameter.
+- **Projektfilter und Suche:** Server-seitige Aggregation `files → imports → projects` für die Filter nach Kamera und Objektiv, dazu die Live-Suche ohne Submit-Button.
+- **SD-Karten-Simulation:** Der Erkennungs-Toast im Dashboard mit zufälligen Karten aus einer Liste von 50 Full-Frame-Kameras, jeweils passendes Objektiv und Seriennummer, Übergabe an den Import per URL.
+- **Kameras:** Automatische Anlage und Pflege von Kameraprofilen nach jedem Import, Sammeln der genutzten Objektive pro Modell, ausklappbare Import-Historie pro Kamera.
+- **Echte Dateinamen:** Pro Hersteller die richtige Namenskonvention (Sony, Canon, Nikon, Leica, Hasselblad usw.) und realistische Dateigrössen für die simulierten Imports.
+- **Designsystem & Brandbook:** Markenfarbe Indigo, Squircle-Logo, Token-System über Tailwind `@theme`, Inter als Hausschrift und der visuelle Refactor der wichtigsten Seiten.
+- **Statistiken:** MongoDB-Aggregationen und Chart.js-Konfiguration für die drei Diagramme (Speicher pro Projekt, Dateien pro Kamera, Importverlauf).
+
+**Was ich selbst geprüft habe:** Den ganzen Code im Editor durchgesehen, lokal gegen die echte Datenbank getestet und an meine Konventionen angepasst. `.env` ist gitignored, keine Credentials im Repo, keine fremden Assets ohne offene Lizenz.
 
 ### 6.2 Prompt-Vorgehen
 
