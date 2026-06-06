@@ -294,6 +294,54 @@
 					{/if}
 					{#if formOpen}
 						<div class="px-6 py-5 space-y-4" style={hasAnyCard ? 'border-top:1px solid var(--color-stroke)' : 'border-top:1px solid var(--color-brand-100)'}>
+							<!-- Versteckter Ordner-Picker -->
+							<input
+								type="file"
+								id="sd_picker"
+								webkitdirectory
+								class="hidden"
+								onchange={(e) => {
+									const target = e.currentTarget as HTMLInputElement;
+									const files = target.files;
+									if (!files || files.length === 0) return;
+									const first = files[0] as File & { webkitRelativePath?: string };
+									const folderName = first.webkitRelativePath?.split('/')[0] ?? first.name;
+									const labelEl = document.getElementById('manual_label') as HTMLInputElement | null;
+									if (labelEl && !labelEl.value.trim()) labelEl.value = folderName;
+									target.value = '';
+								}}
+							/>
+
+							<!-- Primärer Einstieg: SD-Karte im Finder wählen -->
+							<button
+								type="button"
+								onclick={() => document.getElementById('sd_picker')?.click()}
+								class="w-full rounded-xl py-5 px-5 flex items-center gap-4 transition-all"
+								style="background:var(--color-surface); border:1.5px dashed var(--color-stroke-strong);"
+								onmouseenter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brand-500)'; (e.currentTarget as HTMLElement).style.background = 'var(--color-brand-50)'; }}
+								onmouseleave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-stroke-strong)'; (e.currentTarget as HTMLElement).style.background = 'var(--color-surface)'; }}
+							>
+								<div class="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style="background:var(--color-brand-500); color:#fff;">
+									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+										<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+									</svg>
+								</div>
+								<div class="text-left flex-1 min-w-0">
+									<p class="text-[15px] font-semibold tracking-tight" style="color:var(--color-ink-900)">SD-Karte im Finder auswählen</p>
+									<p class="text-[13px] mt-0.5" style="color:var(--color-ink-500)">Wähle den Ordner deiner Karte — das Label wird automatisch ausgelesen.</p>
+								</div>
+								<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 shrink-0" style="color:var(--color-ink-300)">
+									<polyline points="9 18 15 12 9 6"/>
+								</svg>
+							</button>
+
+							<!-- Trennlinie "oder manuell" -->
+							<div class="flex items-center gap-3 pt-1">
+								<div class="flex-1 h-px" style="background:var(--color-stroke)"></div>
+								<span class="text-[11px] font-semibold uppercase tracking-[0.08em]" style="color:var(--color-ink-400)">oder manuell eingeben</span>
+								<div class="flex-1 h-px" style="background:var(--color-stroke)"></div>
+							</div>
+
 							<!-- Eingabe-Grid -->
 							<div class="grid grid-cols-2 gap-4">
 								<div class="space-y-1.5">
@@ -361,43 +409,8 @@
 								</div>
 							</div>
 
-							<!-- Versteckter Ordner-Picker -->
-							<input
-								type="file"
-								id="sd_picker"
-								webkitdirectory
-								class="hidden"
-								onchange={(e) => {
-									const target = e.currentTarget as HTMLInputElement;
-									const files = target.files;
-									if (!files || files.length === 0) return;
-									const first = files[0] as File & { webkitRelativePath?: string };
-									const folderName = first.webkitRelativePath?.split('/')[0] ?? first.name;
-									const labelEl = document.getElementById('manual_label') as HTMLInputElement | null;
-									if (labelEl && !labelEl.value.trim()) labelEl.value = folderName;
-									target.value = '';
-								}}
-							/>
-
-							<!-- Aktionsleiste -->
-							<div class="flex items-center gap-3 pt-1">
-								<button
-									type="button"
-									onclick={() => document.getElementById('sd_picker')?.click()}
-									class="flex items-center gap-2 rounded-full px-4 py-2.5 text-[13px] font-medium transition-all"
-									style="background:var(--color-surface); border:1px solid var(--color-stroke-strong); color:var(--color-ink-700); box-shadow:var(--shadow-soft);"
-									onmouseenter={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-brand-500)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-brand-500)'; }}
-									onmouseleave={(e) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--color-stroke-strong)'; (e.currentTarget as HTMLElement).style.color = 'var(--color-ink-700)'; }}
-									title="Ordner der SD-Karte im Finder wählen"
-								>
-									<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-										<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
-									</svg>
-									Im Finder auswählen
-								</button>
-
-								<div class="flex-1"></div>
-
+							<!-- Aktionsleiste — nur primärer Button rechts ausgerichtet -->
+							<div class="flex items-center justify-end pt-1">
 								<button
 									type="button"
 									onclick={() => {
