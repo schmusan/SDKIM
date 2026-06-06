@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import Tooltip from '$lib/components/Tooltip.svelte';
+	import { getNamingScheme } from '$lib/camera-data';
 
 	let { data, form } = $props();
 
@@ -46,7 +47,6 @@
 	let verifyChecksums = $state(true);
 	let detectDuplicates = $state(true);
 	let showFolderPreview = $state(false);
-	let templateName = $state('');
 
 	function toggleNewCard(idx: number) {
 		newCards = newCards.map((c, i) => (i === idx ? { ...c, selected: !c.selected } : c));
@@ -111,10 +111,42 @@
 		if (step > 1) step -= 1;
 	}
 
-	function folderPreview() {
-		const camRaw = resolvedSdCards[0]?.camera ?? 'SonyA7IV';
-		const cam = camRaw.replace(/\s+/g, '');
-		return `${newProjectName || 'Projektname'}/\n├── ${cam}_24mm/\n│   ├── ${cam}_0001.MP4\n│   └── ${cam}_0002.ARW\n└── ${cam}_70mm/\n    └── ${cam}_0003.MP4`;
+	function sanitize(s: string): string {
+		return s.replace(/[\s/]+/g, '_');
+	}
+
+	function folderPreview(): string {
+		// Echter Projektname aus Auswahl oder Eingabe
+		const projectName = projectId === 'new'
+			? (newProjectName.trim() || 'Projektname')
+			: (selectedProject?.name ?? 'Projektname');
+
+		if (resolvedSdCards.length === 0) {
+			return `${projectName}/\n└── (Wähle erst eine SD-Karte aus)`;
+		}
+
+		const lines: string[] = [`${projectName}/`];
+
+		resolvedSdCards.forEach((card, idx) => {
+			const isLast = idx === resolvedSdCards.length - 1;
+			const branch = isLast ? '└──' : '├──';
+			const childIndent = isLast ? '    ' : '│   ';
+
+			const camDir = sanitize(card.camera || 'UnbekannteKamera');
+			const lensDir = card.lens ? sanitize(card.lens) : 'UnbekanntesObjektiv';
+			const scheme = getNamingScheme(card.camera || '');
+
+			// Echte Beispieldateien gemäss Hersteller-Konvention (1 Foto, 1 Video)
+			const photoFile = `${scheme.photoPrefix(1)}.${scheme.photoExt}`;
+			const videoFile = `${scheme.videoPrefix(2)}.${scheme.videoExt}`;
+
+			lines.push(`${branch} ${camDir}/`);
+			lines.push(`${childIndent}└── ${lensDir}/`);
+			lines.push(`${childIndent}    ├── ${photoFile}`);
+			lines.push(`${childIndent}    └── ${videoFile}`);
+		});
+
+		return lines.join('\n');
 	}
 </script>
 
@@ -538,21 +570,6 @@
 					</div>
 				{/if}
 
-				<div class="pt-4 border-t border-gray-100">
-					<label class="block text-sm font-medium text-gray-800 mb-1 flex items-center gap-2" for="template_name">
-						Als Vorlage speichern (optional)
-						<Tooltip text="Vorlagen speichern die aktuellen Importoptionen unter einem Namen. Beim nächsten Import kannst du die Vorlage aus den Einstellungen auswählen, statt alles neu zu konfigurieren." />
-					</label>
-					<input
-						id="template_name"
-						name="template_name"
-						type="text"
-						bind:value={templateName}
-						placeholder="z.B. Standard-Videoproduktion"
-						class="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-					/>
-					<p class="text-xs text-gray-400 mt-1">Leer lassen, um nichts zu speichern.</p>
-				</div>
 			</div>
 		</div>
 
@@ -628,12 +645,6 @@
 						</dd>
 					</div>
 
-					<div class="grid grid-cols-3 gap-4 px-4 py-3">
-						<dt class="text-xs font-medium text-gray-500 uppercase tracking-wide">Vorlage</dt>
-						<dd class="col-span-2 text-sm text-gray-900">
-							{templateName.trim() || 'Wird nicht gespeichert'}
-						</dd>
-					</div>
 				</dl>
 
 				<div class="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-3 rounded-md">
