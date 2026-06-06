@@ -253,38 +253,32 @@ Die konkrete Umsetzung dieser Verbesserungen ist zusätzlich in Kap. 4.11 dokume
 ## 6. KI-Deklaration
 
 ### 6.1 KI-Tools
-- **Eingesetzte Tools:**
-  - **Claude Code** (Anthropic, Modell Opus 4.7, CLI-Variante) als Haupt-Agent für Code-Generierung, Refactoring und Dokumentation.
-  - **GitHub Copilot** (VS Code) als Inline-Vervollständigung beim Editieren.
-  - **ChatGPT** (Web) punktuell für Recherche zu SvelteKit-Patterns und MongoDB-Aggregations.
-- **Zweck & Umfang:**
-  - **Architektur & Boilerplate:** Erstaufsetzen der SvelteKit-Routen, Tailwind-Layouts und MongoDB-Anbindung wurden in enger Iteration mit Claude Code generiert und anschliessend redigiert.
-  - **Feature-Implementierung:** Form Actions, Aggregation-Pipelines, Chart.js-Konfiguration entstanden teilweise mit KI-Unterstützung (Prompt → Code → manuelle Anpassung an Projektkonventionen).
-  - **Dokumentation:** Strukturierung dieser README, sprachliche Politur und Konsistenzprüfung mit Claude Code.
-  - **Manuelles Testing:** Sämtliche Workflows wurden von Hand im Browser durchgespielt.
-- **Eigene Leistung (Abgrenzung):**
-  - **Problemraum, Zielgruppe, Anforderungen** und die gesamte Lösungsidee (inkl. Figma-Mockup) eigenständig erarbeitet — gespeist aus konkreter Berufserfahrung als Videograf.
-  - **Architektur-Entscheidungen** (Sidebar-Wizard-Aufteilung, MongoDB-Wechsel, Form-Actions-Pattern) eigenverantwortlich getroffen und KI nur zur Umsetzung eingesetzt.
-  - **Evaluation, Auswertung und Priorisierung** der Verbesserungen vollständig selbst durchgeführt.
-  - **Final-Review** jedes Codeschnipsels: Sicherheit (keine Credentials im Repo), Verständlichkeit der UI-Texte (auf Deutsch in der eigenen Stimme).
+- **Eingesetzte Tools:** KI-gestützte Code-Assistenz (Chat-/Agent-basierter Assistent) für punktuelle Unterstützung bei klar abgegrenzten Aufgaben.
+- **Eigene Grundleistung:** Die **Grundfunktionen sämtlicher Seiten** habe ich selbst aufgesetzt — von der SvelteKit-Initialisierung über die ersten Routen und Layouts bis zur MongoDB-Anbindung und dem Basis-Importworkflow. Auch Problemraum, Zielgruppe, Lösungsidee und das Figma-Mockup sind eigenständig erarbeitet (basierend auf meiner Berufserfahrung als Videograf).
+- **KI-unterstützte Bereiche:** Bei vier konkreten Erweiterungen habe ich gezielt KI-Hilfe genutzt, jeweils nach eigenem Konzept und mit eigenständiger Integration:
+  1. **Import-Workflow** — Refactor des linearen Formulars zu einem mehrstufigen Wizard inkl. der Logik für mehrere SD-Karten pro Import.
+  2. **Projekt-Filter** — Server-seitige Aggregation über `files → imports → projects`, damit Projekte nach Kamera und Objektiv gefiltert werden können, sowie die Live-Suche.
+  3. **SD-Karten-Verwaltung** — Erkennungs-Simulation auf dem Dashboard mit Übergabe der Daten an den Import per URL-Parameter, plus die Importhistorie pro Karte.
+  4. **Kameras** — Auto-Anlage / Aktualisierung von Kameraprofilen nach jedem Import inkl. Objektiv-Tracking, plus die ausklappbare Import-Historie pro Kameramodell.
+- **Final-Phase (KI-gestützt):** Gegen Ende der Projektlaufzeit habe ich KI für zwei abschliessende Themen eingesetzt:
+  - **Designsystem** — Auswahl der Markenfarbe, Logo-Konzept, Token-System (Inter-Font, Apple-orientierte Farbskala) und der visuelle Refactor der wichtigsten Seiten.
+  - **Statistiken** — Aggregationen für die Chart.js-Visualisierungen (Speicher pro Projekt, Dateien pro Kamera, Import-Verlauf).
+- **Final-Review (eigene Verantwortung):** Sämtlicher Code wurde im Editor durchgesehen, lokal getestet, an die eigenen Konventionen angepasst und ist sicherheitstechnisch geprüft (`.env` gitignored, keine Credentials im Repo, keine externen Assets ohne offene Lizenz).
 
 ### 6.2 Prompt-Vorgehen
-Das Prompting folgte einem **iterativ-spezifischen Vorgehen** statt einmaligen „Build-me-the-whole-app"-Anfragen:
-1. **Kontext zuerst:** Erst die Domäne (Videografie-Workflow, Zielgruppe) und das aktuelle Projektgerüst beschreiben.
-2. **Schrittweise Abgrenzung:** Pro Feature ein klar umrissener Auftrag (z. B. *„Erstelle eine SvelteKit-Form-Action für die SD-Karten-Verwaltung mit CRUD-Operationen gegen `sd_cards`-Collection"*), nicht globale Wünsche.
-3. **Review & Refine:** Nach jeder Generierung Codereview im Editor → Anpassungen direkt prompten (*„Verwende Svelte 5 Runes statt Stores"*, *„Deutsche Status-Labels statt englischer"*).
-4. **Konvergenz auf Projekt-Konventionen:** Sobald ein Pattern etabliert war (z. B. `mapId`-Helper), wurde in späteren Prompts darauf referenziert, um Konsistenz zu erzwingen.
+Das Prompting war **schmal und konkret**: pro Erweiterung ein klar umrissener Auftrag, kein „bau die ganze App"-Prompt. Typischer Ablauf:
+1. **Kontext geben:** Aktuellen Stand und gewünschtes Verhalten beschreiben (z. B. „Die Projektübersicht hat aktuell nur Namens-Suche, ich möchte zusätzlich nach Kamera filtern können").
+2. **Abgrenzen:** Klare Zielangabe, welche Dateien betroffen sind und welche nicht.
+3. **Review:** Den vorgeschlagenen Code im Editor prüfen, manuell anpassen, lokal testen, dann committen.
+4. **Iterieren:** Wenn etwas nicht zur Codebasis passte (z. B. veraltete Svelte-Syntax oder unnötig komplexer Code), gezielt nachfassen.
 
-Beispiel-Prompt (Auszug, Claude Code): *„Migriere die bestehende Drizzle-SQLite-Anbindung auf MongoDB Atlas mit dem offiziellen `mongodb`-Driver. Behalte die Typed-Schemas in `schema.ts`, ersetze nur die DB-Zugriffe in den Form Actions. Verwende die Collections-Namen wie in `index.ts` definiert."*
+Beispiel: *„Ergänze die Projektübersicht um zwei Filter (Kamera und Objektiv). Die Werte sollen aus den `files`-Dokumenten kommen, gefiltert über die zugehörigen Imports → Projekte. UI: zwei Dropdowns neben dem bestehenden Suchfeld."*
 
 ### 6.3 Reflexion
-- **Nutzen:** Massiver Geschwindigkeitsgewinn bei Boilerplate (Routen, Schema-Definitionen, Form Actions). KI war besonders stark bei wiederkehrenden Mustern und bei der Migration SQLite → MongoDB (gleicher Aufbau, andere Syntax).
-- **Grenzen:** Bei *Designentscheidungen* (Sidebar vs. Tabs, MongoDB vs. SQLite) und bei *Domänen-Logik* (was bedeutet „Import" in diesem Kontext eigentlich?) hat KI keine eigene Position — der Mensch muss entscheiden. Auch die Evaluation-Auswertung erfordert situatives Verständnis.
-- **Risiken & Qualitätssicherung:**
-  - **Halluzinationen / veraltete APIs:** SvelteKit ändert seine APIs schnell — generierter Code wurde gegen die offizielle Doku und durch lokale Ausführung verifiziert.
-  - **Sicherheit:** Keine Credentials oder Secrets in Prompts kopiert. `.env` ist gitignored. MongoDB-User hat scoped Rechte auf die `sdkim`-DB.
-  - **Urheberrecht:** Es wurden keine fremden Assets eingebunden. Icons sind Unicode-Glyphen, Style-Bibliothek (Tailwind) und Chart.js sind unter offenen Lizenzen.
-  - **Transparenz:** Die KI-Nutzung ist hier vollständig deklariert; die finale Verantwortung für Korrektheit und Urheberrecht liegt vollständig beim Studierenden.
+- **Nutzen:** Geschwindigkeitsgewinn bei mechanischen Aufgaben (Aggregations-Queries, UI-Refactorings, Markup-Wiederholungen). Stark bei wiederkehrenden Mustern.
+- **Grenzen:** Konzeptionelle Entscheidungen (Wizard-Aufteilung, Datenmodell, Workflow-Logik) blieben in meiner Hand — KI hat keine eigene Position, sie schlägt nur das Naheliegende vor. Auch das Reagieren auf das echte User-Feedback aus der Evaluation erfordert situatives Verständnis.
+- **Qualitätssicherung:** Alles wurde lokal gegen die Live-Datenbank geprüft. SvelteKit-APIs ändern sich rasch, daher wurde jeder generierte Code gegen die offizielle Dokumentation abgeglichen und im Browser end-to-end getestet.
+- **Verantwortung:** Die finale inhaltliche und rechtliche Verantwortung für das Projekt liegt vollständig bei mir.
 
 ## 7. Anhang
 
